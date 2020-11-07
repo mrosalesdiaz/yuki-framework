@@ -9,6 +9,9 @@
 
 rootProject.name = 'framework'
 
+include ':development-builder'
+project(':development-builder').projectDir = new File(settingsDir, './development-builder')
+
 include ':development-worker'
 project(':development-worker').projectDir = new File(settingsDir, './development-worker')
 

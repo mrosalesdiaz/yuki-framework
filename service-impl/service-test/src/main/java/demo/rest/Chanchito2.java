@@ -3,19 +3,17 @@ package demo.rest;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import rest.TestClaa;
 import yuki.framework.endpoints.annotations.EndpointExtension;
 import yuki.resources.TestResource;
 
 @EndpointExtension(TestResource.class)
-public class Chanchito implements Handler<RoutingContext> {
+public class Chanchito2 implements Handler<RoutingContext> {
 
 	@Override
 	public void handle(final RoutingContext routingContext) {
 		final var json = new JsonObject().put("action", "executed");
 		routingContext.response().end(json.toString());
-		final TestClaa a = null;
-		System.out.println(a);
+
 	}
 
 }

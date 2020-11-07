@@ -6,10 +6,9 @@ import yuki.framework.endpoints.annotations.EndpointDefinition;
 import yuki.framework.enpoints.YukiEndpoint;
 
 @EndpointDefinition(method = HttpMethod.GET, path = "/dbname/chanchito")
-public class TestResource implements YukiEndpoint {
+public class EndpointTemplate implements YukiEndpoint {
 
 	@Override
-	public void handle(final RoutingContext event) {
-	}
+	public void handle(final RoutingContext event) {}
 
 }

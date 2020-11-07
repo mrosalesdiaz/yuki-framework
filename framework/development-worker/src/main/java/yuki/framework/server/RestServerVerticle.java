@@ -1,4 +1,4 @@
-package yuki.framework.rest;
+package yuki.framework.server;
 
 import com.google.inject.Guice;
 
@@ -9,6 +9,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import yuki.framework.enpoints.EndpointHandlers;
 import yuki.framework.guice.GuiceModule;
 
 public class RestServerVerticle extends AbstractVerticle {

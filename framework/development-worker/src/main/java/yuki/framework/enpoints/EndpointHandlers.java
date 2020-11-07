@@ -1,4 +1,4 @@
-package yuki.framework.rest;
+package yuki.framework.enpoints;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +10,6 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -20,10 +19,9 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import yuki.framework.annotations.YukiEndpoint;
-import yuki.framework.endpoints.Extension;
-import yuki.resources.TestResource;
-import yuki.resources.TestResource2;
+import yuki.framework.endpoints.annotations.EndpointDefinition;
+import yuki.framework.endpoints.annotations.EndpointExtension;
+import yuki.framework.server.RestServerVerticle;
 
 public class EndpointHandlers {
 
@@ -32,16 +30,23 @@ public class EndpointHandlers {
 	@Inject
 	private Injector injector;
 
-	private Handler<RoutingContext> emptyResponse(final YukiEndpoint routerInstance) {
+	private Handler<RoutingContext> emptyResponse(final EndpointDefinition endpointDefinition) {
 		System.out.println("Create empty handler");
 		return rc -> {
-			rc.response().end(new JsonObject().put("method", routerInstance.getMethod().name())
-					.put("path", routerInstance.getPath()).toString());
+			rc.response().end(new JsonObject().put("method", endpointDefinition.method())
+					.put("path", endpointDefinition.path()).toString());
 		};
 	}
 
 	private Set<Class<? extends YukiEndpoint>> getEndpointsDefinitions() {
-		return Sets.newHashSet(TestResource.class, TestResource2.class);
+		final var reflections = new Reflections("yuki.resources", new TypeAnnotationsScanner(), new SubTypesScanner());
+		final var returnData = new HashSet<Class<? extends YukiEndpoint>>();
+
+		// TODO: Implement validation of extension type
+		reflections.getTypesAnnotatedWith(EndpointDefinition.class).stream()
+				.forEach(e -> returnData.add((Class<? extends YukiEndpoint>) e));
+
+		return returnData;
 	}
 
 	private Set<Class<? extends Handler<RoutingContext>>> getExtensionsFromProject() {
@@ -49,7 +54,7 @@ public class EndpointHandlers {
 		final var returnData = new HashSet<Class<? extends Handler<RoutingContext>>>();
 
 		// TODO: Implement validation of extension type
-		reflections.getTypesAnnotatedWith(Extension.class).stream()
+		reflections.getTypesAnnotatedWith(EndpointExtension.class).stream()
 				.forEach(e -> returnData.add((Class<? extends Handler<RoutingContext>>) e));
 
 		return returnData;
@@ -70,7 +75,7 @@ public class EndpointHandlers {
 
 		this.getExtensionsFromProject().stream().forEach(ec -> {
 			final Class<? extends Handler<RoutingContext>> extensionHandler = ec;
-			returnValue.put(ec.getAnnotation(Extension.class).value(), extensionHandler);
+			returnValue.put(ec.getAnnotation(EndpointExtension.class).value(), extensionHandler);
 		});
 
 		return returnValue;
@@ -82,19 +87,19 @@ public class EndpointHandlers {
 
 		for (final Entry<Class<? extends YukiEndpoint>, Class<? extends Handler<RoutingContext>>> mapEndpointAndExtension : routers
 				.entrySet()) {
-
+			final var endpointDefinition = mapEndpointAndExtension.getKey().getAnnotation(EndpointDefinition.class);
 			final var routerInstance = this.injector.getInstance(mapEndpointAndExtension.getKey());
 			Handler<RoutingContext> handlerRequestClass;
 
 			if (mapEndpointAndExtension.getValue() == null) {
-				handlerRequestClass = this.emptyResponse(routerInstance);
+				handlerRequestClass = this.emptyResponse(endpointDefinition);
 			} else {
 				handlerRequestClass = this.injector.getInstance(mapEndpointAndExtension.getValue());
 			}
 
 			this.injector.injectMembers(routerInstance);
 
-			final var route = apiRouter.route(routerInstance.getMethod(), routerInstance.getPath()).handler(e -> {
+			final var route = apiRouter.route(endpointDefinition.method(), endpointDefinition.path()).handler(e -> {
 				System.out.println("EndpointHandlers.registerHandlers()");
 				handlerRequestClass.handle(e);
 			});

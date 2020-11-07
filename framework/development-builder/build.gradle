@@ -12,9 +12,10 @@ dependencies {
 	compile group: 'io.vertx', name: 'vertx-web', version: '3.9.4'
 	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+	implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.16.2'
 }
 
 vertx {
-  mainVerticle = 'yuki.framework.rest.RestServerVerticle'
+  mainVerticle = 'yuki.builders.resources.EndpointsBuilderVerticle'
   debugSuspend = true
 }

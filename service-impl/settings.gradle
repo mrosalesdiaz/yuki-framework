@@ -15,8 +15,12 @@ project(':development-worker').projectDir = new File(settingsDir, '../framework/
 
 include ':rest'
 project(':rest').projectDir = new File(settingsDir, './service-test')
+
+
 /*
 
+include ':endpoints'
+project(':endpoints').projectDir = new File(settingsDir, './endpoints')
 include ':shootory-gen'
 project(':shootory-gen').projectDir = new File(settingsDir, './shootory-gen')
 
