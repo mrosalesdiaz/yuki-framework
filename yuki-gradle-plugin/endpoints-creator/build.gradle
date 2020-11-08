@@ -1,0 +1,36 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'yuki.gen-endpoints'
+            implementationClass = 'yuki.plugin.gen.endpoints.GenEndpointsPlugin'
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {	
+    testImplementation("junit:junit:4.13")
+    compile group: 'io.vertx', name: 'vertx-core', version: '3.9.4'
+    implementation 'com.github.javaparser:javaparser-core:3.16.2'
+    compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
+}
+
+group = 'org.samples'
+version = '1.0'
+
+publishing {
+    repositories {
+        maven {
+            url = "file://Volumes/sdcard/yuki/local_publish"
+        }
+    }
+}
+

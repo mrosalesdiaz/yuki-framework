@@ -229,3 +229,7 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,eclipse,java,vertx,node
 
+
+## Project Specific
+.local_publish
+local_publish
