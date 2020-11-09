@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
     id "io.vertx.vertx-plugin" version "1.1.3"
-    id "yuki.gen-endpoints" version "1.0"
 }
 
 repositories {
@@ -11,10 +10,13 @@ repositories {
 dependencies {
 	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
 	compile group: 'io.vertx', name: 'vertx-web', version: '3.9.4'
-
+	
+	testCompile group: 'io.vertx', name: 'vertx-junit5', version: '3.9.4'
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+	
 }
 
 vertx {
-  mainVerticle = 'yuki.framework.rest.RestServerVerticle'
+  mainVerticle = 'services.products.verticle.ProductsVerticle'
   debugSuspend = true
 }

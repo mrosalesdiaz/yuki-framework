@@ -39,25 +39,23 @@ public class EndpointHandlers {
 	}
 
 	private Set<Class<? extends YukiEndpoint>> getEndpointsDefinitions() {
-		new Reflections("yuki.resources", new TypeAnnotationsScanner(), new SubTypesScanner());
+		final var reflections = new Reflections("yuki.resources", new TypeAnnotationsScanner(), new SubTypesScanner());
 		final var returnData = new HashSet<Class<? extends YukiEndpoint>>();
 
 		// TODO: Implement validation of extension type
-		for (final Class<? extends YukiEndpoint> endpointDefinition : returnData) {
-			returnData.add(endpointDefinition);
-		}
+		reflections.getTypesAnnotatedWith(EndpointDefinition.class).stream()
+				.forEach(e -> returnData.add((Class<? extends YukiEndpoint>) e));
 
 		return returnData;
 	}
 
 	private Set<Class<? extends Handler<RoutingContext>>> getExtensionsFromProject(final String extensionsPackage) {
-		new Reflections(extensionsPackage, new TypeAnnotationsScanner(), new SubTypesScanner());
+		final var reflections = new Reflections(extensionsPackage, new TypeAnnotationsScanner(), new SubTypesScanner());
 		final var returnData = new HashSet<Class<? extends Handler<RoutingContext>>>();
 
-		// TODO: Implement validation of handler type
-		for (final Class<? extends Handler<RoutingContext>> handlerClass : returnData) {
-			returnData.add(handlerClass);
-		}
+		// TODO: Implement validation of extension type
+		reflections.getTypesAnnotatedWith(EndpointExtension.class).stream()
+				.forEach(e -> returnData.add((Class<? extends Handler<RoutingContext>>) e));
 
 		return returnData;
 	}
