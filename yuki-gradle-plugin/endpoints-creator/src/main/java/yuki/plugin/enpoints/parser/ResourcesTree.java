@@ -43,7 +43,7 @@ public class ResourcesTree {
 		new ArrayList<ResourceNode>();
 
 		final var allObject = new Stack<ResourceNode>();
-		for (final JsonObject umlObject : JsonTraverseHelper.getUMLObjects(this.cachedStarUmlContent)) {
+		for (final JsonObject umlObject : PluginHelper.getUMLObjects(this.cachedStarUmlContent)) {
 
 			final var node = new ResourceNode();
 			node.name = umlObject.getString("name", "<noname>");
@@ -55,7 +55,7 @@ public class ResourcesTree {
 
 		final var links = new Stack<JsonObject>();
 
-		JsonTraverseHelper.getUMLLinks(this.cachedStarUmlContent).forEach(links::add);
+		PluginHelper.getUMLLinks(this.cachedStarUmlContent).forEach(links::add);
 
 		while (links.size() > 0) {
 			final var link = links.pop();
@@ -95,7 +95,7 @@ public class ResourcesTree {
 			return "<nomethod>";
 		}
 		if (classifier instanceof JsonObject) {
-			return JsonTraverseHelper.getInterfaces(this.cachedStarUmlContent).stream()
+			return PluginHelper.getInterfaces(this.cachedStarUmlContent).stream()
 					.filter(e -> Objects.equals(((JsonObject) classifier).getString("$ref"), e.getString("_id")))
 					.map(e -> e.getString("name")).findFirst().orElse("<nomethod>");
 		}

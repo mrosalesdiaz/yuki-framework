@@ -12,17 +12,17 @@ import org.gradle.internal.impldep.org.apache.commons.io.IOUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public final class JsonTraverseHelper {
+public final class PluginHelper {
 
-	private JsonTraverseHelper() {
+	private PluginHelper() {
 	}
 
 	public static List<JsonObject> getUMLLinks(final JsonObject rootJsonObject) {
 
 		final List<JsonObject> returnList = new ArrayList<>();
 
-		JsonTraverseHelper.traverse(rootJsonObject, (o) -> {
-			JsonTraverseHelper.isObject(o, n -> n.getString("_type", "").equals("UMLLink")).accept(returnList::add);
+		PluginHelper.traverse(rootJsonObject, (o) -> {
+			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLLink")).accept(returnList::add);
 		});
 
 		return returnList;
@@ -33,8 +33,8 @@ public final class JsonTraverseHelper {
 
 		final List<JsonObject> returnList = new ArrayList<>();
 
-		JsonTraverseHelper.traverse(rootJsonObject, (o) -> {
-			JsonTraverseHelper.isObject(o, n -> n.getString("_type", "").equals("UMLObject")).accept(returnList::add);
+		PluginHelper.traverse(rootJsonObject, (o) -> {
+			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLObject")).accept(returnList::add);
 		});
 
 		return returnList;
@@ -55,9 +55,9 @@ public final class JsonTraverseHelper {
 			if (e == null) {
 				return;
 			} else if (e instanceof JsonObject) {
-				JsonTraverseHelper.traverse((JsonObject) e, fn);
+				PluginHelper.traverse((JsonObject) e, fn);
 			} else if (e instanceof JsonArray) {
-				JsonTraverseHelper.traverse((JsonArray) e, fn);
+				PluginHelper.traverse((JsonArray) e, fn);
 			}
 		});
 	}
@@ -68,9 +68,9 @@ public final class JsonTraverseHelper {
 			if (e.getValue() == null) {
 				return;
 			} else if (e.getValue() instanceof JsonObject) {
-				JsonTraverseHelper.traverse((JsonObject) e.getValue(), fn);
+				PluginHelper.traverse((JsonObject) e.getValue(), fn);
 			} else if (e.getValue() instanceof JsonArray) {
-				JsonTraverseHelper.traverse((JsonArray) e.getValue(), fn);
+				PluginHelper.traverse((JsonArray) e.getValue(), fn);
 			}
 		});
 
@@ -79,8 +79,8 @@ public final class JsonTraverseHelper {
 	public static List<JsonObject> getInterfaces(final JsonObject rootJsonObject) {
 		final List<JsonObject> returnList = new ArrayList<>();
 
-		JsonTraverseHelper.traverse(rootJsonObject, (o) -> {
-			JsonTraverseHelper.isObject(o, n -> n.getString("_type", "").equals("UMLInterface"))
+		PluginHelper.traverse(rootJsonObject, (o) -> {
+			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLInterface"))
 					.accept(returnList::add);
 		});
 
@@ -89,7 +89,7 @@ public final class JsonTraverseHelper {
 
 	public static String getJavaTemplateForResources() throws IOException {
 		return IOUtils.resourceToString("/java-template-resource.txt", Charset.forName("utf-8"),
-				JsonTraverseHelper.class.getClassLoader());
+				PluginHelper.class.getClassLoader());
 	}
 
 }

@@ -12,7 +12,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 
-import yuki.plugin.enpoints.parser.JsonTraverseHelper;
+import yuki.plugin.enpoints.parser.PluginHelper;
 
 public class CreateClassesTasks {
 
@@ -27,7 +27,7 @@ public class CreateClassesTasks {
 	private void createEndpointClass(final String path, final String name, final String method, final Path folder)
 			throws IOException {
 
-		final var endPointClass = StaticJavaParser.parse(JsonTraverseHelper.getJavaTemplateForResources());
+		final var endPointClass = StaticJavaParser.parse(PluginHelper.getJavaTemplateForResources());
 
 		endPointClass.findFirst(ClassOrInterfaceDeclaration.class).get().setName(name);
 		endPointClass.findFirst(ClassOrInterfaceDeclaration.class).get().findAll(NormalAnnotationExpr.class).get(0)
