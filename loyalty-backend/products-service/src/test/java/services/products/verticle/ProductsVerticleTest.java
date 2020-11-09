@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.google.inject.Guice;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -17,8 +19,11 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class ProductsVerticleTest {
+
 	@Test
 	public void start_server() throws InterruptedException {
+		final var injector = Guice.createInjector();
+
 		final var testContext = new VertxTestContext();
 
 		final var config = new JsonObject();
@@ -31,6 +36,7 @@ public class ProductsVerticleTest {
 		final var eventBus = vertx.eventBus();
 
 		final var verticle = new ProductsVerticle();
+		injector.injectMembers(verticle);
 
 		vertx.deployVerticle(verticle, deplomentOptions, r -> {
 			eventBus.request("/bus/products", new JsonObject().put("q", "s"), ac -> {
@@ -38,7 +44,7 @@ public class ProductsVerticleTest {
 				Assertions.assertTrue(this.isJsonArray(ac), "Should be a JsonArray");
 				Assertions.assertTrue(this.isNotEmpty(ac), "Should not be empty");
 				Assertions.assertTrue(this.isHasPaginationMetadata(ac), "Should has pagination header");
-				// Assertions.assertTrue(this.isHasProductLinks(r));
+				Assertions.assertTrue(this.isHasProductLinks(ac), "Additional links for view details");
 
 				testContext.completeNow();
 			});
@@ -46,6 +52,16 @@ public class ProductsVerticleTest {
 
 		testContext.awaitCompletion(10, TimeUnit.MINUTES);
 
+	}
+
+	private boolean isHasProductLinks(final AsyncResult<Message<Object>> ac) {
+		if (!(ac.result().body() instanceof JsonArray)) {
+			return false;
+		}
+
+		final var reponse = (JsonArray) ac.result().body();
+
+		return reponse.stream().anyMatch(e -> ((JsonObject) e).getString("link") != null);
 	}
 
 	private boolean isHasPaginationMetadata(final AsyncResult<Message<Object>> ac) {
