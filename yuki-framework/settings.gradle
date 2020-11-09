@@ -7,13 +7,13 @@
  * in the user manual at https://docs.gradle.org/5.4/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'framework'
+rootProject.name = 'yuki-framework'
 
-include ':development-builder'
-project(':development-builder').projectDir = new File(settingsDir, './development-builder')
+include ':development-api'
+project(':development-api').projectDir = new File(settingsDir, './development-api')
 
-include ':development-worker'
-project(':development-worker').projectDir = new File(settingsDir, './development-worker')
+include ':http-endpoints-service'
+project(':http-endpoints-service').projectDir = new File(settingsDir, './http-endpoints-service')
 
 
 /*

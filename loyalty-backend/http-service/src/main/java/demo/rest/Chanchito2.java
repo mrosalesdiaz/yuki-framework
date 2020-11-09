@@ -4,9 +4,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import yuki.framework.endpoints.annotations.EndpointExtension;
-import yuki.resources.TestResource;
+import yuki.resources.TemplateEndpoint;
 
-@EndpointExtension(TestResource.class)
+@EndpointExtension(TemplateEndpoint.class)
 public class Chanchito2 implements Handler<RoutingContext> {
 
 	@Override

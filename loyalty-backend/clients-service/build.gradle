@@ -9,15 +9,9 @@ repositories {
 }
 
 dependencies {
-	compile project(':development-worker')
 	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
 	compile group: 'io.vertx', name: 'vertx-web', version: '3.9.4'
-
 }
-
-startUml.startUmlFile = '/Volumes/sdcard/yuki/yuki-gradle-plugin/endpoints-creator/files/uml-sample.mdj'
-startUml.output = '/Volumes/sdcard/yuki/service-impl/service-test/src/main/gen-yuki/yuki/resources/'
-startUml.rootPath = 'Rest Enpoint/RootContext'
 
 vertx {
   mainVerticle = 'yuki.framework.rest.RestServerVerticle'

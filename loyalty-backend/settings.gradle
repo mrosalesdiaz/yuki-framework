@@ -7,23 +7,28 @@
  * in the user manual at https://docs.gradle.org/5.4/userguide/multi_project_builds.html
  */
  pluginManagement {
-    repositories {
-        maven {
-            url "file://Volumes/sdcard/yuki/local_publish"
-        }
-        gradlePluginPortal()
-    }
+ 	repositories {
+ 		maven {
+ 			url "file://Volumes/sdcard/yuki/local_publish"
+ 		}
+ 		gradlePluginPortal()
+ 	}
+ }
+
+ rootProject.name = 'loyalty-backend'
+
+ [
+ 'http-service'
+ , 'clients-service'
+ , 'promotions-service'
+ , 'products-service'
+ ].each{name-> 
+ 	include ":${name}"
+ 	project(":${name}").projectDir = new File(settingsDir, "./${name}")
 }
 
-rootProject.name = 'service-impl'
-
-
-include ':development-worker' 
-project(':development-worker').projectDir = new File(settingsDir, '../framework/development-worker')
-
-include ':rest'
-project(':rest').projectDir = new File(settingsDir, './service-test')
-
+include ":http-endpoints-service"
+project(":http-endpoints-service").projectDir = new File(settingsDir, "../yuki-framework/http-endpoints-service")
 
 /*
 
@@ -41,5 +46,5 @@ project(':shootory-jndi').projectDir = new File(settingsDir, './shootory-jndi')
 
 include ':shootory-function'
 project(':shootory-function').projectDir = new File(settingsDir, './shootory-function')
- */
- 
+*/
+

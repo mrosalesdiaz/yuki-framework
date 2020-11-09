@@ -23,11 +23,19 @@ public class RestServerVerticle extends AbstractVerticle {
 	}
 
 	private void createServer(final Vertx vertx, final Router router, final Promise<Void> startPromise) {
+		final var realClassName = this.getClass().getName();
+		final int port = this.config().getInteger("serverPort", 8080);
 		this.httpServer = vertx.createHttpServer();
 		this.httpServer.requestHandler(router);
-		this.httpServer.listen(this.config().getInteger("serverPort", 8080), e -> {
-			RestServerVerticle.logger
-					.info(String.format("Yuki Web Server started in port: %s", e.result().actualPort()));
+		this.httpServer.listen(port, e -> {
+			if (e.failed()) {
+				RestServerVerticle.logger.info(String
+						.format("The server cannot be started in port: %s with Verticle %s", port, realClassName));
+				return;
+			}
+
+			RestServerVerticle.logger.info(String.format("Yuki Web Server started in port: %s with Verticle %s",
+					e.result().actualPort(), realClassName));
 			startPromise.complete();
 		});
 	}
@@ -46,7 +54,8 @@ public class RestServerVerticle extends AbstractVerticle {
 
 		mainRouter.mountSubRouter("/api", apiRouter);
 
-		endpointsHandlers.registerHandlers(apiRouter);
+		endpointsHandlers.registerHandlers(apiRouter,
+				this.config().getString("extensionsPackage", "loyalty.backend.endpoints"));
 
 		this.createServer(this.vertx, mainRouter, startPromise);
 

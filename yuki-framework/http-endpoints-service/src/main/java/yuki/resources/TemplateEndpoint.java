@@ -5,11 +5,10 @@ import io.vertx.ext.web.RoutingContext;
 import yuki.framework.endpoints.annotations.EndpointDefinition;
 import yuki.framework.enpoints.YukiEndpoint;
 
-@EndpointDefinition(method = HttpMethod.GET, path = "/dbname/chanchito")
-public class TestResource implements YukiEndpoint {
+@EndpointDefinition(method = HttpMethod.GET, path = "/chanchito")
+public class TemplateEndpoint implements YukiEndpoint {
 
-	@Override
-	public void handle(final RoutingContext event) {
-	}
-
+    @Override
+    public void handle(final RoutingContext event) {
+    }
 }
