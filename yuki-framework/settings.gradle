@@ -15,6 +15,9 @@ project(':development-api').projectDir = new File(settingsDir, './development-ap
 include ':http-endpoints-service'
 project(':http-endpoints-service').projectDir = new File(settingsDir, './http-endpoints-service')
 
+include ':dataaccess'
+project(':dataaccess').projectDir = new File(settingsDir, './dataaccess')
+
 
 /*
 include ':shootory-annotations'

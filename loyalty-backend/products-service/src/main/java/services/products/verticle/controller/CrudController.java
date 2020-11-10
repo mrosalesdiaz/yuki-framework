@@ -19,7 +19,8 @@ public class CrudController {
 	public void list(final Message<JsonObject> message) {
 		message.body().getString("productId");
 
-		this.productDao.list(null);
+		// TODO: pass this as parameter
+		this.productDao.list(new DeliveryOptions());
 
 		this.reply(message::reply, this.productDao::list, message);
 	}

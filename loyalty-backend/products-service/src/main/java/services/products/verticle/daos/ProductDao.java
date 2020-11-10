@@ -14,13 +14,24 @@ public class ProductDao {
 
 	public @Nullable JsonArray list(final DeliveryOptions deliveryOptions) {
 
-		final var sqlExecutor = this.queryExecutor.execute(ListProductsQuery.class);
+		try {
+			final var query = this.queryExecutor.execute(ListProductsQuery.class);
 
-		deliveryOptions.setHeaders(sqlExecutor.getHeaders());
+			query.setName("test");
 
-		sqlExecutor.setStatus("active");
+			deliveryOptions.setHeaders(query.getHeaders());
 
-		return sqlExecutor.execute(JsonArray.class);
+			return query.execute(JsonArray.class);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+
+		// deliveryOptions.setHeaders(sqlExecutor.getHeaders());
+
+		// sqlExecutor.setStatus("active");
+
+		// return sqlExecutor.execute(JsonArray.class);
+		return null;
 	}
 
 }

@@ -31,6 +31,10 @@ public class ProductsVerticleTest {
 		final var deplomentOptions = new DeploymentOptions().setConfig(config).setWorker(true).setInstances(1)
 				.setWorkerPoolSize(1);
 
+		deplomentOptions.setConfig(
+				new JsonObject().put("jdbcUrl", "jdbc:postgresql://localhost/db_loyalty?currentSchema=products")
+						.put("dbUser", "loyalty").put("dbPassword", "moresecure"));
+
 		final var vertx = Vertx.vertx();
 
 		final var eventBus = vertx.eventBus();

@@ -30,6 +30,9 @@
 include ":http-endpoints-service"
 project(":http-endpoints-service").projectDir = new File(settingsDir, "../yuki-framework/http-endpoints-service")
 
+include ":dataaccess"
+project(":dataaccess").projectDir = new File(settingsDir, "../yuki-framework/dataaccess")
+
 /*
 
 include ':endpoints'
