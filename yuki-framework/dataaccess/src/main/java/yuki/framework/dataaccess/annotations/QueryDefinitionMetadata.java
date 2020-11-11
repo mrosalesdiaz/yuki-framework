@@ -1,4 +1,4 @@
-package yuki.framework.dataaccess;
+package yuki.framework.dataaccess.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

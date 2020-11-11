@@ -1,0 +1,28 @@
+buildscript {
+    dependencies {
+		classpath group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+    }
+}
+
+plugins {
+	id 'application'
+    id "org.flywaydb.flyway" version "7.2.0"
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+	compile group: 'org.flywaydb', name:'flyway-core', version:'7.2.0'
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+}
+
+mainClassName = "yuki.framework.dataschema.FlywayMain"
+
+flyway {
+    url = 'jdbc:postgresql://localhost/db_loyalty'
+    user = 'loyalty'
+    password = 'moresecure'
+    schemas = ['products']
+}

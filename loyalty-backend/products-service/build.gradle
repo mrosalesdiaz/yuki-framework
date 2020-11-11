@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
 	implementation project(':dataaccess')
+	implementation project(':dataaccess')
 	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
 	compile group: 'io.vertx', name: 'vertx-web', version: '3.9.4'
 	

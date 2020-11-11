@@ -1,8 +1,10 @@
 package services.products.verticle;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -10,15 +12,25 @@ import com.google.inject.Guice;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import yuki.framework.dataschema.FlywayMain;
 
 @ExtendWith(VertxExtension.class)
 public class ProductsVerticleTest {
+
+	@BeforeEach
+	public void prepareDatabase() {
+		FlywayMain.executeFlayway("clean", "jdbc:postgresql://localhost/db_loyalty", "loyalty", "moresecure",
+				"products", true);
+		FlywayMain.executeFlayway("migrate", "jdbc:postgresql://localhost/db_loyalty", "loyalty", "moresecure",
+				"products");
+	}
 
 	@Test
 	public void start_server() throws InterruptedException {
@@ -28,32 +40,50 @@ public class ProductsVerticleTest {
 
 		final var config = new JsonObject();
 
-		final var deplomentOptions = new DeploymentOptions().setConfig(config).setWorker(true).setInstances(1)
-				.setWorkerPoolSize(1);
+		final var deplomentOptions = new DeploymentOptions().setConfig(config).setWorker(true).setInstances(10)
+				.setWorkerPoolSize(5);
 
-		deplomentOptions.setConfig(
-				new JsonObject().put("jdbcUrl", "jdbc:postgresql://localhost/db_loyalty?currentSchema=products")
+		deplomentOptions
+				.setConfig(new JsonObject().put("jdbcUrl", "postgresql://localhost/db_loyalty?search_path=products")
 						.put("dbUser", "loyalty").put("dbPassword", "moresecure"));
 
 		final var vertx = Vertx.vertx();
 
 		final var eventBus = vertx.eventBus();
 
-		final var verticle = new ProductsVerticle();
-		injector.injectMembers(verticle);
+		vertx.deployVerticle(new Supplier<Verticle>() {
+			@Override
+			public Verticle get() {
+				final var verticle = new ProductsVerticle();
+				injector.injectMembers(verticle);
+				return verticle;
+			}
+		}, deplomentOptions, r -> {
+			if (r.failed()) {
+				Assertions.fail("Verticle cannot be deployed", r.cause());
+				testContext.failNow(r.cause());
+				return;
+			}
 
-		vertx.deployVerticle(verticle, deplomentOptions, r -> {
-			eventBus.request("/bus/products", new JsonObject().put("q", "s"), ac -> {
-				System.out.println(" Client ::" + ac.result().body());
-				Assertions.assertTrue(this.isJsonArray(ac), "Should be a JsonArray");
-				Assertions.assertTrue(this.isNotEmpty(ac), "Should not be empty");
-				Assertions.assertTrue(this.isHasPaginationMetadata(ac), "Should has pagination header");
-				Assertions.assertTrue(this.isHasProductLinks(ac), "Additional links for view details");
+			for (int i = 0; i < 100; i++) {
+				final var b = System.currentTimeMillis();
+				eventBus.request("/bus/products:search", new JsonObject().put("q", "s"), ac -> {
+					if (ac.failed()) {
+						Assertions.fail("Cannot complete execution", ac.cause());
+						testContext.failNow(ac.cause());
+						return;
+					}
+					System.out.println(("::::::::" + (System.currentTimeMillis() - b)));
+					System.out.println(" Client ::" + ac.result().body());
+					Assertions.assertTrue(this.isJsonArray(ac), "Should be a JsonArray");
+					Assertions.assertTrue(this.isNotEmpty(ac), "Should not be empty");
+					Assertions.assertFalse(this.isHasPaginationMetadata(ac), "Should has pagination header");
+					Assertions.assertFalse(this.isHasProductLinks(ac), "Additional links for view details");
 
-				testContext.completeNow();
-			});
+				});
+			}
 		});
-
+//testContext.completeNow();
 		testContext.awaitCompletion(10, TimeUnit.MINUTES);
 
 	}

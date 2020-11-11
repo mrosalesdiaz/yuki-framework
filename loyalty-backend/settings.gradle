@@ -33,6 +33,9 @@ project(":http-endpoints-service").projectDir = new File(settingsDir, "../yuki-f
 include ":dataaccess"
 project(":dataaccess").projectDir = new File(settingsDir, "../yuki-framework/dataaccess")
 
+include ":dataschema"
+project(":dataschema").projectDir = new File(settingsDir, "../yuki-framework/dataschema")
+
 /*
 
 include ':endpoints'

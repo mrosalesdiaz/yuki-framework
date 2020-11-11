@@ -18,6 +18,9 @@ project(':http-endpoints-service').projectDir = new File(settingsDir, './http-en
 include ':dataaccess'
 project(':dataaccess').projectDir = new File(settingsDir, './dataaccess')
 
+include ':dataschema'
+project(':dataschema').projectDir = new File(settingsDir, './dataschema')
+
 
 /*
 include ':shootory-annotations'

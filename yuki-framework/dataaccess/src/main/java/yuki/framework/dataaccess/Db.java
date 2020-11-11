@@ -1,29 +1,29 @@
 package yuki.framework.dataaccess;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.pgclient.PgConnectOptions;
+import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.PoolOptions;
 
 public class Db {
-	private final HikariConfig config = new HikariConfig();
-	private HikariDataSource ds;
+	private PoolOptions poolOptions;
+	private PgConnectOptions connectOptions;
+	private Vertx vertx;
+	private PgPool client;
 
-	void init(final JsonObject configuration) {
-		this.config.setJdbcUrl(configuration.getString("jdbcUrl"));
-		this.config.setUsername(configuration.getString("dbUser"));
-		this.config.setPassword(configuration.getString("dbPassword"));
-		this.config.addDataSourceProperty("cachePrepStmts", "true");
-		this.config.addDataSourceProperty("prepStmtCacheSize", "250");
-		this.config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-		this.ds = new HikariDataSource(this.config);
+	void init(final JsonObject configuration, final Vertx vertx) {
+		this.connectOptions = PgConnectOptions.fromUri(configuration.getString("jdbcUrl"))
+				.setUser(configuration.getString("dbUser")).setPassword(configuration.getString("dbPassword"));
 
+		this.poolOptions = new PoolOptions().setMaxSize(5);
+		this.vertx = vertx;
+		this.client = PgPool.pool(this.vertx, this.connectOptions, this.poolOptions);
 	}
 
-	public Connection getConnection() throws SQLException {
-		return this.ds.getConnection();
+	public PgPool getConnection() throws SQLException {
+		return this.client;
 	}
 }

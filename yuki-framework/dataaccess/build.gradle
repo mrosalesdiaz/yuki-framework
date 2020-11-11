@@ -11,6 +11,7 @@ dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
 	compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
 }
 
 vertx {

@@ -1,37 +1,32 @@
 package services.products.verticle.daos;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import io.vertx.core.Future;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
-import services.products.verticle.data.QueryExecutor;
+import services.products.queries.SearchProductsQuery;
+import yuki.framework.dataaccess.utils.QueryExecutor;
 
 public class ProductDao {
 
 	@Inject
 	private QueryExecutor queryExecutor;
 
-	public @Nullable JsonArray list(final DeliveryOptions deliveryOptions) {
+	public Future<JsonArray> search(final DeliveryOptions deliveryOptions) {
+		final var headers = deliveryOptions.getHeaders();
+		final var query = this.queryExecutor.create(SearchProductsQuery.class);
 
-		try {
-			final var query = this.queryExecutor.execute(ListProductsQuery.class);
-
-			query.setName("test");
-
-			deliveryOptions.setHeaders(query.getHeaders());
-
-			return query.execute(JsonArray.class);
-		} catch (final Exception e) {
-			e.printStackTrace();
+		if (deliveryOptions.getHeaders() == null) {
+			return query.execute();
 		}
 
-		// deliveryOptions.setHeaders(sqlExecutor.getHeaders());
+		if (headers.contains("name")) {
+			query.setName(headers.get("name"));
+		}
 
-		// sqlExecutor.setStatus("active");
+		return query.execute();
 
-		// return sqlExecutor.execute(JsonArray.class);
-		return null;
 	}
 
 }

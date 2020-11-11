@@ -6,17 +6,17 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 
 import io.vertx.core.AbstractVerticle;
-import services.products.verticle.controller.CrudController;
+import services.products.controller.ProductsController;
 import yuki.framework.dataaccess.Db;
 import yuki.framework.dataaccess.DbConfigurator;
 
 public class ProductsVerticle extends AbstractVerticle {
 
 	@Inject
-	private CrudController crudController;
+	private ProductsController productsController;
 
 	@Inject
-	private DbConfigurator configurator;
+	private DbConfigurator dbConfigurator;
 
 	@Override
 	public void start() throws Exception {
@@ -30,11 +30,15 @@ public class ProductsVerticle extends AbstractVerticle {
 
 		verticleInjector.injectMembers(this);
 
-		this.configurator.init(this.config());
+		this.dbConfigurator.init(this.config(), this.vertx);
 
 		final var eb = this.vertx.eventBus();
 
-		eb.consumer("/bus/products", this.crudController::list);
+		eb.consumer("/bus/products:search", this.productsController::search);
+		eb.consumer("/bus/products:create", this.productsController::create);
+		eb.consumer("/bus/products:update", this.productsController::update);
+		eb.consumer("/bus/products:delete", this.productsController::delete);
+		eb.consumer("/bus/products:read", this.productsController::read);
 	}
 
 }
