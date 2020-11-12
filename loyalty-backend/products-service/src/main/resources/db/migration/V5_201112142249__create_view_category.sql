@@ -1,0 +1,1 @@
+create or replace view v_categories as select ID, name, 'SSS' as oink from product_category;

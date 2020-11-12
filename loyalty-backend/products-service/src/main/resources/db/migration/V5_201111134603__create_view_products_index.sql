@@ -1,0 +1,8 @@
+-- create view v_product_index as select id, title  from product;
+-- create table product (
+-- 	id SERIAL PRIMARY KEY,
+-- 	title VARCHAR(50),
+-- 	description TEXT,
+-- 	category VARCHAR(50),
+-- 	price DECIMAL(5,2)
+-- );

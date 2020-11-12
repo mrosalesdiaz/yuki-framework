@@ -10,8 +10,9 @@ EOSQL
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "db_loyalty" <<-EOSQL
    	-- register extensions
-    CREATE EXTENSION "pgcrypto";
-    CREATE EXTENSION "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+	CREATE EXTENSION IF NOT EXISTS "tablefunc";
 
     CREATE SCHEMA "products" AUTHORIZATION loyalty;
 EOSQL

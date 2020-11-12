@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.google.inject.Guice;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Verticle;
@@ -33,19 +34,113 @@ public class ProductsVerticleTest {
 	}
 
 	@Test
+	public void Should_create_a_category_When_name_is_passed() throws Throwable {
+		final var testContext = new VertxTestContext();
+		final var vertx = Vertx.vertx();
+		final var eventbus = vertx.eventBus();
+
+		vertx.deployVerticle(this.verticleFactory(ProductsVerticle.class), this.createDefaultDeployemntOptions(),
+				ar -> {
+					if (ar.failed()) {
+						testContext.failNow(ar.cause());
+					}
+
+					final JsonObject newCategory = new JsonObject().put("name", "category-1");
+					eventbus.request("/bus/product/category:create", newCategory, mar -> {
+						if (mar.failed()) {
+							testContext.failNow(mar.cause());
+						}
+
+						System.out.println(mar.result().body());
+
+						final JsonObject body = (JsonObject) mar.result().body();
+
+						Assertions.assertTrue(body.containsKey("name"), "category id is null");
+						Assertions.assertTrue(body.containsKey("id"), "category id is null");
+
+						Assertions.assertEquals(body.getString("name"), newCategory.getString("name"));
+						Assertions.assertNotNull(body.getString("id"));
+
+						testContext.completeNow();
+					});
+
+				});
+
+		testContext.awaitCompletion(10, TimeUnit.SECONDS);
+
+		if (testContext.failed()) {
+			throw testContext.causeOfFailure();
+		}
+	}
+
+	private DeploymentOptions createDefaultDeployemntOptions() {
+		final var config = new JsonObject().put("jdbcUrl", "postgresql://localhost/db_loyalty?search_path=products")
+				.put("dbUser", "loyalty").put("dbPassword", "moresecure");
+		return new DeploymentOptions().setConfig(config);
+	}
+
+	private Supplier<Verticle> verticleFactory(final Class<? extends AbstractVerticle> verticleClass) {
+		return new Supplier<>() {
+			@Override
+			public Verticle get() {
+				final var injector = Guice.createInjector();
+				return injector.getInstance(verticleClass);
+			}
+
+		};
+	}
+
+	public void Should_create_one_category_when_all_parameters_are_correct() throws InterruptedException {
+		final var testContext = new VertxTestContext();
+		final var injector = Guice.createInjector();
+		final var deplomentOptions = this.createDefaultDeployemntOptions().setWorker(true).setInstances(10)
+				.setWorkerPoolSize(5);
+
+		final var vertx = Vertx.vertx();
+		final var eventBus = vertx.eventBus();
+
+		vertx.deployVerticle(new Supplier<Verticle>() {
+			@Override
+			public Verticle get() {
+				final var verticle = new ProductsVerticle();
+				injector.injectMembers(verticle);
+				return verticle;
+			}
+		}, deplomentOptions, r -> {
+			if (r.failed()) {
+				Assertions.fail("Verticle cannot be deployed", r.cause());
+				testContext.failNow(r.cause());
+				return;
+			}
+
+			eventBus.request("/bus/products:create", new JsonObject().put("name", "category-name"), ac -> {
+				if (ac.failed()) {
+					Assertions.fail("Cannot complete execution", ac.cause());
+					testContext.failNow(ac.cause());
+					return;
+				}
+
+				System.out.println(" Client ::" + ac.result().body());
+				Assertions.assertTrue(this.isJsonArray(ac), "Should be a JsonArray");
+				Assertions.assertTrue(this.isNotEmpty(ac), "Should not be empty");
+				Assertions.assertFalse(this.isHasPaginationMetadata(ac), "Should has pagination header");
+				Assertions.assertFalse(this.isHasProductLinks(ac), "Additional links for view details");
+
+			});
+		});
+//testContext.completeNow();
+		testContext.awaitCompletion(1, TimeUnit.MINUTES);
+	}
+
 	public void start_server() throws InterruptedException {
 		final var injector = Guice.createInjector();
 
 		final var testContext = new VertxTestContext();
 
-		final var config = new JsonObject();
+		new JsonObject();
 
-		final var deplomentOptions = new DeploymentOptions().setConfig(config).setWorker(true).setInstances(10)
+		final var deplomentOptions = this.createDefaultDeployemntOptions().setWorker(true).setInstances(10)
 				.setWorkerPoolSize(5);
-
-		deplomentOptions
-				.setConfig(new JsonObject().put("jdbcUrl", "postgresql://localhost/db_loyalty?search_path=products")
-						.put("dbUser", "loyalty").put("dbPassword", "moresecure"));
 
 		final var vertx = Vertx.vertx();
 
@@ -84,7 +179,7 @@ public class ProductsVerticleTest {
 			}
 		});
 //testContext.completeNow();
-		testContext.awaitCompletion(10, TimeUnit.MINUTES);
+		testContext.awaitCompletion(1, TimeUnit.MINUTES);
 
 	}
 
