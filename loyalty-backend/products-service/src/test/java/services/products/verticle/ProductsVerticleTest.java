@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 
 import io.vertx.core.AbstractVerticle;
@@ -39,35 +40,49 @@ public class ProductsVerticleTest {
 		final var vertx = Vertx.vertx();
 		final var eventbus = vertx.eventBus();
 
-		vertx.deployVerticle(this.verticleFactory(ProductsVerticle.class), this.createDefaultDeployemntOptions(),
-				ar -> {
+		vertx.deployVerticle(this.verticleFactory(ProductsVerticle.class),
+				this.createDefaultDeployemntOptions().setWorker(true), ar -> {
 					if (ar.failed()) {
 						testContext.failNow(ar.cause());
 					}
 
 					final JsonObject newCategory = new JsonObject().put("name", "category-1");
+					final Stopwatch stopwatch = Stopwatch.createStarted();
 					eventbus.request("/bus/product/category:create", newCategory, mar -> {
+						stopwatch.stop();
+						System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS));
 						if (mar.failed()) {
 							testContext.failNow(mar.cause());
 						}
 
-						System.out.println(mar.result().body());
+						testContext.verify(() -> {
 
-						final JsonObject body = (JsonObject) mar.result().body();
+							org.assertj.core.api.Assertions.assertThat(mar.result()).isNotNull();
+							org.assertj.core.api.Assertions.assertThat(mar.result().body()).isNotNull();
+							org.assertj.core.api.Assertions.assertThat(mar.result().body())
+									.hasSameClassAs(new JsonArray());
 
-						Assertions.assertTrue(body.containsKey("name"), "category id is null");
-						Assertions.assertTrue(body.containsKey("id"), "category id is null");
+							final JsonObject body = (JsonObject) ((JsonArray) mar.result().body()).stream().findFirst()
+									.orElseThrow();
 
-						Assertions.assertEquals(body.getString("name"), newCategory.getString("name"));
-						Assertions.assertNotNull(body.getString("id"));
+							org.assertj.core.api.Assertions.assertThat(body.containsKey("id")).isTrue();
+							org.assertj.core.api.Assertions.assertThat(body.containsKey("name")).isTrue();
+
+							org.assertj.core.api.Assertions.assertThat(body.getString("name"))
+									.isEqualTo(newCategory.getString("name"));
+							org.assertj.core.api.Assertions.assertThat(body.getInteger("id")).isNotNull();
+
+							org.assertj.core.api.Assertions.assertThat(stopwatch.elapsed(TimeUnit.MILLISECONDS))
+									.isLessThan(100);
+
+						});
 
 						testContext.completeNow();
 					});
 
 				});
 
-		testContext.awaitCompletion(10, TimeUnit.SECONDS);
-
+		org.assertj.core.api.Assertions.assertThat(testContext.awaitCompletion(100, TimeUnit.SECONDS)).isTrue();
 		if (testContext.failed()) {
 			throw testContext.causeOfFailure();
 		}

@@ -6,6 +6,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import services.products.controller.CategoriesController;
 import services.products.controller.ProductsController;
 import yuki.framework.dataaccess.Db;
@@ -23,7 +24,7 @@ public class ProductsVerticle extends AbstractVerticle {
 	private DbConfigurator dbConfigurator;
 
 	@Override
-	public void start() throws Exception {
+	public void start(final Promise<Void> startPromise) throws Exception {
 
 		final var verticleInjector = Guice.createInjector(new AbstractModule() {
 			@Override
@@ -34,8 +35,6 @@ public class ProductsVerticle extends AbstractVerticle {
 
 		verticleInjector.injectMembers(this);
 
-		this.dbConfigurator.init(this.config(), this.vertx);
-
 		final var eb = this.vertx.eventBus();
 
 		eb.consumer("/bus/product/category:create", this.categoriesController::create);
@@ -44,6 +43,8 @@ public class ProductsVerticle extends AbstractVerticle {
 		eb.consumer("/bus/products:update", this.productsController::update);
 		eb.consumer("/bus/products:delete", this.productsController::delete);
 		eb.consumer("/bus/products:read", this.productsController::read);
+
+		this.dbConfigurator.init(this.config(), this.vertx).onComplete(startPromise);
 	}
 
 }
