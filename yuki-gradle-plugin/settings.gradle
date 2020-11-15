@@ -1,7 +1,0 @@
-rootProject.name = 'yuki-gradle-plugin'
-
-include ':endpoints-creator'
-project(':endpoints-creator').projectDir = new File(settingsDir, './endpoints-creator')
-
-include ':development-service'
-project(':development-service').projectDir = new File(settingsDir, './development-service')
