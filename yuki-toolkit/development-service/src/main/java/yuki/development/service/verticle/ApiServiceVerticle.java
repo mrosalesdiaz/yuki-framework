@@ -80,6 +80,8 @@ public class ApiServiceVerticle extends AbstractVerticle {
 
 					final var apiRouter = this.createApiRouter(this.vertx);
 
+					this.createInfoRoute(injector, mainRouter, this.config());
+
 					mainRouter.mountSubRouter("/api", apiRouter);
 
 					this.createFunctionsRoute(injector, apiRouter);
@@ -88,6 +90,15 @@ public class ApiServiceVerticle extends AbstractVerticle {
 					this.createServer(this.vertx, mainRouter, startPromise);
 
 				});
+
+	}
+
+	private void createInfoRoute(final Injector injector, final Router apiRouter, final JsonObject config) {
+		injector.getInstance(PostgreSqlFunctionController.class);
+		apiRouter.head()
+				.handler(rc -> rc.response()
+						.putHeader("yuki-version", "x.x.x")
+						.end());
 
 	}
 

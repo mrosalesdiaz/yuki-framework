@@ -11,13 +11,17 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.SourceSet;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import feign.Feign;
+import feign.codec.StringDecoder;
 import yuki.plugin.developmentserver.DevelopmentService;
 import yuki.plugin.enpoints.parser.ResourcesTree;
+import yuki.plugin.gen.queryclasses.YukiDevelopment;
 import yuki.plugin.gen.querydefinitions.QueryDefinitionsCreator;
 import yuki.plugin.guice.GuiceModule;
 
@@ -48,6 +52,9 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 
 		project.task("genFunctions")
 				.doLast(task -> {
+
+					this.checkDevelopmentServer(task.getName(), yukiPluginParameters.getServiceUrl());
+
 					this.developmentService.getDbFunctionDefinitions(yukiPluginParameters)
 							.forEach(f -> {
 								try {
@@ -62,6 +69,9 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 
 		project.task("genEndpoints")
 				.doLast(task -> {
+
+					this.checkDevelopmentServer(task.getName(), yukiPluginParameters.getServiceUrl());
+
 					final var resourcesTree = new ResourcesTree();
 					try {
 						resourcesTree.loadStarUml(Paths.get(paremeters.startUmlFile), paremeters.rootPath);
@@ -82,6 +92,28 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 
 				});
 
+	}
+
+	private void checkDevelopmentServer(final String name, final Property<String> property) {
+		if (!property.isPresent()) {
+			throw new GradleException(String
+					.format("Error executing task: %s. Configuration for URL is not present. check yuki.serviceUrl property.", name));
+		}
+
+		this.checkHttpConnection(name, property.get());
+
+	}
+
+	private void checkHttpConnection(final String taskName, final String stringUrl) {
+		try {
+			Feign.builder()
+					.decoder(new StringDecoder())
+					.target(YukiDevelopment.class, stringUrl)
+					.checkStatus();
+		} catch (final Exception e) {
+			throw new GradleException(
+					String.format("Development server(%2$s) is down for task: %1$s ", taskName, stringUrl), e);
+		}
 	}
 
 	private File addGenYukiSourceFolder(final Project project, final File sourceFolder) {
