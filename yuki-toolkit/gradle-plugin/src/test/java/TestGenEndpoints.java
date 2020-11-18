@@ -2,7 +2,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
-import yuki.plugin.gen.endpoints.GenEndpointsPlugin;
+import yuki.plugin.gen.endpoints.YukiGenPlugin;
 
 public class TestGenEndpoints {
 	@Test
@@ -16,6 +16,6 @@ public class TestGenEndpoints {
 		project.getRepositories().mavenLocal();
 		project.getPluginManager().apply("yuki.gen-endpoints");
 
-		Assert.assertTrue(project.getTasks().getByName("genEndpoints") instanceof GenEndpointsPlugin);
+		Assert.assertTrue(project.getTasks().getByName("genEndpoints") instanceof YukiGenPlugin);
 	}
 }

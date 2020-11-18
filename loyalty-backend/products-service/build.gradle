@@ -21,11 +21,11 @@ dependencies {
 	
 }
 
-developmentServer {
+yuki {
 	serviceUrl = 'http://localhost:10009'
+	schema = 'products'
 }
 
-startUml.startUmlFile = 'Test'
 
 vertx {
   mainVerticle = 'services.products.verticle.ProductsVerticle'

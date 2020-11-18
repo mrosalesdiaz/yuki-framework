@@ -7,26 +7,22 @@ import java.nio.file.Paths;
 
 import javax.inject.Inject;
 
-import org.gradle.api.GradleException;
-
 import com.google.common.io.ByteStreams;
 
 import yuki.plugin.developmentserver.DbFunctionDefinition;
 import yuki.plugin.gen.endpoints.YukiPluginExtension;
 
 public class QueryDefinitionsCreator {
-	private static final String YUKI_GEN_QUERIES = "yuki/gen/queries";
+	private static final String YUKI_GEN_QUERIES = "yuki/functions";
 	@Inject
 	private NewQueryDefinitionGenerator newQueryDefinitionGenerator;
 
 	public void updateJavaClassDefinition(final DbFunctionDefinition f, final YukiPluginExtension parameters,
 			final File genYukiFolder) throws IOException {
-		if (!parameters.getOutput()
-				.isPresent()) {
-			throw new GradleException("The output parameter is missed");
-		}
+
 		final File finalJavaFilePath = genYukiFolder.toPath()
 				.resolve(QueryDefinitionsCreator.YUKI_GEN_QUERIES)
+				.resolve(JavaClassHelper.getJavaFileName(f))
 				.toFile();
 
 		this.prepareFolderStructure(genYukiFolder, QueryDefinitionsCreator.YUKI_GEN_QUERIES);

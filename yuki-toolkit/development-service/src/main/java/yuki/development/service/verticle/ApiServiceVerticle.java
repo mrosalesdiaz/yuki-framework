@@ -104,7 +104,7 @@ public class ApiServiceVerticle extends AbstractVerticle {
 
 	private void createFunctionsRoute(final Injector injector, final Router apiRouter) {
 		final var controller = injector.getInstance(PostgreSqlFunctionController.class);
-		apiRouter.get("/functions")
+		apiRouter.get("/:schemaName/functions")
 				.handler(controller::getPostgreSqlFunctions);
 	}
 

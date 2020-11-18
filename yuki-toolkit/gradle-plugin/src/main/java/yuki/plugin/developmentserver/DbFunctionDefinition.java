@@ -7,6 +7,8 @@ public class DbFunctionDefinition {
 	private String name;
 
 	private String functionName;
+	
+	private String schemaName;
 
 	private Map<String, String> returnParameters;
 
@@ -42,6 +44,14 @@ public class DbFunctionDefinition {
 
 	public void setFunctionName(final String functionName) {
 		this.functionName = functionName;
+	}
+
+	public String getSchemaName() {
+		return schemaName;
+	}
+
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
 	}
 
 }

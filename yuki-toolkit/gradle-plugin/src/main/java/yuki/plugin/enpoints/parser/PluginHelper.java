@@ -1,13 +1,13 @@
 package yuki.plugin.enpoints.parser;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import org.gradle.internal.impldep.org.apache.commons.io.IOUtils;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +22,9 @@ public final class PluginHelper {
 		final List<JsonObject> returnList = new ArrayList<>();
 
 		PluginHelper.traverse(rootJsonObject, (o) -> {
-			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLLink")).accept(returnList::add);
+			PluginHelper.isObject(o, n -> n.getString("_type", "")
+					.equals("UMLLink"))
+					.accept(returnList::add);
 		});
 
 		return returnList;
@@ -34,7 +36,9 @@ public final class PluginHelper {
 		final List<JsonObject> returnList = new ArrayList<>();
 
 		PluginHelper.traverse(rootJsonObject, (o) -> {
-			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLObject")).accept(returnList::add);
+			PluginHelper.isObject(o, n -> n.getString("_type", "")
+					.equals("UMLObject"))
+					.accept(returnList::add);
 		});
 
 		return returnList;
@@ -80,7 +84,8 @@ public final class PluginHelper {
 		final List<JsonObject> returnList = new ArrayList<>();
 
 		PluginHelper.traverse(rootJsonObject, (o) -> {
-			PluginHelper.isObject(o, n -> n.getString("_type", "").equals("UMLInterface"))
+			PluginHelper.isObject(o, n -> n.getString("_type", "")
+					.equals("UMLInterface"))
 					.accept(returnList::add);
 		});
 
@@ -88,8 +93,8 @@ public final class PluginHelper {
 	}
 
 	public static String getJavaTemplateForResources() throws IOException {
-		return IOUtils.resourceToString("/java-template-resource.txt", Charset.forName("utf-8"),
-				PluginHelper.class.getClassLoader());
+		return Resources.toString(Resources
+				.getResource(PluginHelper.class, "/templates/java-template-resource.txt"), Charsets.UTF_8);
 	}
 
 }

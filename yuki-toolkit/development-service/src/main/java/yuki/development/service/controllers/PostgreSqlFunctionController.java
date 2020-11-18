@@ -39,6 +39,8 @@ public class PostgreSqlFunctionController {
 
 	public void getPostgreSqlFunctions(final RoutingContext rc) {
 		try {
+			final var schema = rc.request()
+					.getParam("schemaName");
 			final String query = Resources.toString(Resources
 					.getResource(this.getClass(), "/sql/get-functions-definitions.sql"), Charsets.UTF_8);
 			this.db.getConnection()
@@ -55,6 +57,8 @@ public class PostgreSqlFunctionController {
 							responseEntity = a.result()
 									.stream()
 									.map(JsonObject.class::cast)
+									.filter(o -> o.getString("schemaName", "")
+											.equalsIgnoreCase(schema))
 									.map(this::postProcessClassName)
 									.map(this::postProcessParameterType)
 									.sorted(this.postSortingForSuffixNaming())

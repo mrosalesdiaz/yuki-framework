@@ -2,7 +2,6 @@ package yuki.plugin.gen.endpoints;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.inject.Inject;
@@ -20,12 +19,12 @@ import com.google.inject.Injector;
 import feign.Feign;
 import feign.codec.StringDecoder;
 import yuki.plugin.developmentserver.DevelopmentService;
-import yuki.plugin.enpoints.parser.ResourcesTree;
 import yuki.plugin.gen.queryclasses.YukiDevelopment;
+import yuki.plugin.gen.querydefinitions.EndpointDefinitionsCreator;
 import yuki.plugin.gen.querydefinitions.QueryDefinitionsCreator;
 import yuki.plugin.guice.GuiceModule;
 
-public class GenEndpointsPlugin implements Plugin<Project> {
+public class YukiGenPlugin implements Plugin<Project> {
 	private static final String SRC_MAIN_GEN_YUKI = "src/main/gen-yuki";
 
 	@Inject
@@ -34,21 +33,21 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 	@Inject
 	public QueryDefinitionsCreator queryDefinitionsCreator;
 
+	@Inject
+	public EndpointDefinitionsCreator endpointDefinitionsCreator;
+
 	@Override
 	public void apply(final Project project) {
 
 		final Injector injector = Guice.createInjector(new GuiceModule());
 		injector.injectMembers(this);
 
-		final var sourceFolder = new File(project.relativePath(GenEndpointsPlugin.SRC_MAIN_GEN_YUKI));
+		final var sourceFolder = new File(project.relativePath(YukiGenPlugin.SRC_MAIN_GEN_YUKI));
 
 		this.addGenYukiSourceFolder(project, sourceFolder);
 
 		final var yukiPluginParameters = project.getExtensions()
 				.create("yuki", YukiPluginExtension.class);
-
-		final var paremeters = project.getExtensions()
-				.create("yuki", GenEndpointsPluginExtension.class);
 
 		project.task("genFunctions")
 				.doLast(task -> {
@@ -59,7 +58,10 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 							.forEach(f -> {
 								try {
 									this.queryDefinitionsCreator
-											.updateJavaClassDefinition(f, yukiPluginParameters, sourceFolder);
+											.updateJavaClassDefinition(f, yukiPluginParameters, Paths
+													.get(project.getProjectDir()
+															.toString(), sourceFolder.toString())
+													.toFile());
 								} catch (final IOException e) {
 									throw new GradleException(
 											String.format("Error during creation of file %s ", f.getFunctionName()), e);
@@ -72,23 +74,17 @@ public class GenEndpointsPlugin implements Plugin<Project> {
 
 					this.checkDevelopmentServer(task.getName(), yukiPluginParameters.getServiceUrl());
 
-					final var resourcesTree = new ResourcesTree();
-					try {
-						resourcesTree.loadStarUml(Paths.get(paremeters.startUmlFile), paremeters.rootPath);
-
-						final var tasks = new CreateClassesTasks();
-						Path path;
-						if (paremeters.output == null) {
-							path = Paths.get(project.getProjectDir()
-									.toString(), sourceFolder.toString(), "src/main/java/gen-yuki");
-						} else {
-							path = Paths.get(paremeters.output);
-						}
-						tasks.create(resourcesTree.getResourceList(), path);
-
-					} catch (final IOException e) {
-						throw new RuntimeException("Error generating resources", e);
-					}
+					this.developmentService.getEndpointsDefinitions(yukiPluginParameters)
+							.forEach(endpoint -> {
+								try {
+									this.endpointDefinitionsCreator
+											.createEndpoint(endpoint, Paths.get(project.getProjectDir()
+													.toString(), sourceFolder.toString(), "yuki/resources"));
+								} catch (final IOException e) {
+									throw new GradleException(String
+											.format("Error during creation of class %s ", endpoint.getClassName()), e);
+								}
+							});
 
 				});
 

@@ -15,6 +15,10 @@ dependencies {
 
 }
 
+yuki{
+	serviceUrl = "http://localhost:10009/" 
+}
+
 vertx {
   mainVerticle = 'loyalty.backend.verticle.LoyaltyBackendVerticle'
   debugSuspend = true

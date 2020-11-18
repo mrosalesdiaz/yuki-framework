@@ -47,13 +47,13 @@ public class NewQueryDefinitionGenerator {
 	}
 
 	private void applyClassNameAndPackage(final CompilationUnit queryDefinitionClass, final DbFunctionDefinition f,
-			final String buildRelativeFilePath) {
+			final String packageName) {
 		queryDefinitionClass.findFirst(ClassOrInterfaceDeclaration.class)
 				.get()
 				.setName(f.getName());
 		queryDefinitionClass.findFirst(PackageDeclaration.class)
 				.get()
-				.setName("yuki.gen.queries");
+				.setName(packageName);
 
 	}
 
@@ -94,7 +94,7 @@ public class NewQueryDefinitionGenerator {
 	}
 
 	private Type mapToJavaType(final String databaseType) {
-		if (databaseType.equals("TEXT")) {
+		if (databaseType.equalsIgnoreCase("TEXT")) {
 			return new ClassOrInterfaceType(null, "String");
 		}
 		return new ClassOrInterfaceType(null, "Object");
