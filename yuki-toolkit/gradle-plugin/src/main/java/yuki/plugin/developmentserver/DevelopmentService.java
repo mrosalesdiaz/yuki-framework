@@ -10,9 +10,11 @@ import feign.Feign;
 import feign.codec.StringDecoder;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import yuki.plugin.gen.endpoints.YukiPluginExtension;
-import yuki.plugin.gen.queryclasses.DbFunctions;
-import yuki.plugin.gen.queryclasses.Endpoints;
+import yuki.plugin.YukiPluginExtension;
+import yuki.plugin.gen.api.contracts.DbFunctions;
+import yuki.plugin.gen.api.contracts.Endpoints;
+import yuki.plugin.gen.dtos.DbFunctionDefinition;
+import yuki.plugin.gen.dtos.EndpointDefinition;
 
 public class DevelopmentService {
 

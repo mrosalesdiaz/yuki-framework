@@ -1,4 +1,4 @@
-package yuki.plugin.gen.queryclasses;
+package yuki.plugin.gen.api.contracts;
 
 import feign.RequestLine;
 

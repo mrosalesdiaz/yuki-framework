@@ -22,8 +22,8 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 
-import yuki.plugin.developmentserver.DbFunctionDefinition;
-import yuki.plugin.gen.endpoints.YukiPluginExtension;
+import yuki.plugin.YukiPluginExtension;
+import yuki.plugin.gen.dtos.DbFunctionDefinition;
 
 public class NewQueryDefinitionGenerator {
 

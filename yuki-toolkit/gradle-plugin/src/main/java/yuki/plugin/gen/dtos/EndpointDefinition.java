@@ -1,4 +1,4 @@
-package yuki.plugin.developmentserver;
+package yuki.plugin.gen.dtos;
 
 public class EndpointDefinition {
 

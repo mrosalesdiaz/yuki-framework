@@ -2,8 +2,8 @@ package yuki.plugin.gen.querydefinitions;
 
 import java.io.File;
 
-import yuki.plugin.developmentserver.DbFunctionDefinition;
-import yuki.plugin.gen.endpoints.YukiPluginExtension;
+import yuki.plugin.YukiPluginExtension;
+import yuki.plugin.gen.dtos.DbFunctionDefinition;
 
 public class UpdateJavaFileGenerator {
 

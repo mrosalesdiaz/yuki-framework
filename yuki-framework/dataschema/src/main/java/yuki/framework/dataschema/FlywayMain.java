@@ -1,5 +1,11 @@
 package yuki.framework.dataschema;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.flywaydb.core.Flyway;
 
 // date +"V3_%y%m%d%H%M%S__"
@@ -37,5 +43,36 @@ public class FlywayMain {
 			final String schema) {
 		FlywayMain.executeFlayway(action, url, user, password, schema, false);
 
+	}
+
+	public static void main(String[] args) throws ParseException {
+		System.out.println(args.length);
+		System.out.println(args);
+		System.out.println(":"+String.join(",", args)+":");
+		
+		CommandLine commandLine = getCommanLine(args);
+
+		String action = commandLine.getOptionValue("a");
+		String url = commandLine.getOptionValue("s");
+		String user = commandLine.getOptionValue("u");
+		String password = commandLine.getOptionValue("p");
+		String schema = commandLine.getOptionValue("sch");
+System.out.println("action: "+action);
+		executeFlayway(action, url, user, password, schema);
+	}
+
+	private static CommandLine getCommanLine(String[] args) throws ParseException {
+		Options options = new Options();
+
+		options.addOption(new Option("s", "server", true, "JDBC Url to connect database"));
+		options.addOption(new Option("u", "user", true, "Database user"));
+		options.addOption(new Option("p", "password", true, "Database password"));
+		options.addOption(new Option("sch", "schemas", true, "Schema names separated by coma"));
+		options.addOption(new Option("a", "action", true, "The action to execute (migrate|clean)"));
+
+		CommandLineParser commandLineParser = new DefaultParser();
+		CommandLine commandLine = commandLineParser.parse(options, args);
+		System.out.println(commandLine.getOptionValue("server"));
+		return commandLine;
 	}
 }

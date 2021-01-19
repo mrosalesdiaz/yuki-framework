@@ -12,8 +12,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 
-import yuki.plugin.developmentserver.EndpointDefinition;
 import yuki.plugin.enpoints.parser.PluginHelper;
+import yuki.plugin.gen.dtos.EndpointDefinition;
 
 public class EndpointDefinitionsCreator {
 
@@ -24,6 +24,7 @@ public class EndpointDefinitionsCreator {
 		endPointClass.findFirst(ClassOrInterfaceDeclaration.class)
 				.get()
 				.setName(endpoint.getClassName());
+
 		endPointClass.findFirst(ClassOrInterfaceDeclaration.class)
 				.get()
 				.findAll(NormalAnnotationExpr.class)
@@ -45,10 +46,13 @@ public class EndpointDefinitionsCreator {
 					}
 				});
 
-		final var outputFile = folder.resolve(String.format("%s.java", endpoint.getClassName()));
+		final var outputFile = folder.resolve("yuki/resources")
+				.resolve(String.format("%s.java", endpoint.getClassName()));
+
 		outputFile.getParent()
 				.toFile()
 				.mkdirs();
+
 		Files.copy(new ByteArrayInputStream(endPointClass.toString()
 				.getBytes("utf-8")), outputFile, StandardCopyOption.REPLACE_EXISTING);
 	}

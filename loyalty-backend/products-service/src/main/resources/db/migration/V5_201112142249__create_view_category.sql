@@ -1,1 +1,7 @@
-create or replace view v_categories as select ID, name, 'SSS' as oink from product_category;
+CREATE OR replace VIEW v_categories AS
+SELECT
+    id
+    , name
+    , active
+FROM
+    product_category;

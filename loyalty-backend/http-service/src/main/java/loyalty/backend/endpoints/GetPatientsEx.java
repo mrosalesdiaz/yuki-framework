@@ -11,7 +11,9 @@ public class GetPatientsEx implements Handler<RoutingContext> {
 
 	@Override
 	public void handle(final RoutingContext rc) {
-		rc.response().end(new JsonObject().put("Hello", "World").toString());
+		rc.response()
+				.end(new JsonObject().put("Hello", "World")
+						.toString());
 	}
 
 }

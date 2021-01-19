@@ -5,8 +5,9 @@ buildscript {
 }
 
 plugins {
-	id 'application'
+ 	id 'java-library'
     id "org.flywaydb.flyway" version "7.2.0"
+    id 'maven-publish'
 }
 
 repositories {
@@ -16,13 +17,30 @@ repositories {
 dependencies {
 	compile group: 'org.flywaydb', name:'flyway-core', version:'7.2.0'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
 
-mainClassName = "yuki.framework.dataschema.FlywayMain"
+// mainClassName = "yuki.framework.dataschema.FlywayMain"
 
 flyway {
-    url = 'jdbc:postgresql://localhost/db_loyalty'
-    user = 'loyalty'
+    url = 'jdbc:postgresql://localhost/db_hatunmayu'
+    user = 'hatunmayu'
     password = 'moresecure'
-    schemas = ['products']
+    schemas = ['lobby']
+}
+
+group = 'org.yuki'
+version = '1.0'
+
+publishing {
+	publications {
+        dataschema(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = "file://Volumes/sdcard/yuki/local_publish"
+        }
+    }
 }

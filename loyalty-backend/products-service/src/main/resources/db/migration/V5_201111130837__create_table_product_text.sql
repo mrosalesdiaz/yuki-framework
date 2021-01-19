@@ -1,9 +1,10 @@
-create table product_text(
-	id serial primary key,
-	product_id bigint,
-	key text,
-	content text,
-	current boolean,
-	creation_date TIMESTAMP,
-	fOREIGN KEY(product_id) references product(id)
-);
+-- --
+-- Create table to store product text entries
+-- --
+CREATE TABLE product_text( id serial PRIMARY KEY
+, product_id bigint
+, KEY text
+, content text
+, CURRENT boolean
+, creation_date TIMESTAMP
+, FOREIGN KEY(product_id) REFERENCES product(id) );

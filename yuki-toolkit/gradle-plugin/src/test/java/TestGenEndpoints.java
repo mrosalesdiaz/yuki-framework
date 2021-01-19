@@ -2,7 +2,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
-import yuki.plugin.gen.endpoints.YukiGenPlugin;
+import yuki.plugin.YukiGenPlugin;
 
 public class TestGenEndpoints {
 	@Test

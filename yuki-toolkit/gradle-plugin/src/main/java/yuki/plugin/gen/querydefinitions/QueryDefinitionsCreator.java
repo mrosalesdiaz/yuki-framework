@@ -9,8 +9,8 @@ import javax.inject.Inject;
 
 import com.google.common.io.ByteStreams;
 
-import yuki.plugin.developmentserver.DbFunctionDefinition;
-import yuki.plugin.gen.endpoints.YukiPluginExtension;
+import yuki.plugin.YukiPluginExtension;
+import yuki.plugin.gen.dtos.DbFunctionDefinition;
 
 public class QueryDefinitionsCreator {
 	private static final String YUKI_GEN_QUERIES = "yuki/functions";

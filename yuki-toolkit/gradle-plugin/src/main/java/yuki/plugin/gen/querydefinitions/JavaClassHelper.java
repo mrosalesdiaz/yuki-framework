@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import yuki.plugin.developmentserver.DbFunctionDefinition;
+import yuki.plugin.gen.dtos.DbFunctionDefinition;
 
 public final class JavaClassHelper {
 	private JavaClassHelper() {

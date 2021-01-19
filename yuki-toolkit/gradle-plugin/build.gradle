@@ -7,7 +7,7 @@ gradlePlugin {
     plugins {
         simplePlugin {
             id = 'yuki.gen-endpoints'
-            implementationClass = 'yuki.plugin.gen.endpoints.YukiGenPlugin'
+            implementationClass = 'yuki.plugin.YukiGenPlugin'
         }
     }
 }
