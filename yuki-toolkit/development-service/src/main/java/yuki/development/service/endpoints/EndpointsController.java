@@ -1,6 +1,7 @@
 package yuki.development.service.endpoints;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -18,8 +19,11 @@ public class EndpointsController {
 	public void getEndpoints(final RoutingContext rc, final JsonObject config) {
 
 		try {
-			this.resourcesTree
-					.loadStarUml(Paths.get(config.getString("endpointsModel")), config.getString("rootEndpoints"));
+			final Path starUmlFile = Paths
+					.get(rc.queryParam("endpointsModel") == null ? config.getString("endpointsModel")
+							: rc.queryParam("endpointsModel")
+									.get(0));
+			this.resourcesTree.loadStarUml(starUmlFile, config.getString("rootEndpoints"));
 		} catch (final IOException e) {
 			rc.fail(e);
 			return;

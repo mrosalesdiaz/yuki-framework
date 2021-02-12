@@ -34,10 +34,13 @@ public class ApiServiceVerticle extends AbstractVerticle {
 
 	@Override
 	public JsonObject config() {
+		final JsonObject current = super.config();
+
 		return new JsonObject().put("jdbcUrl", "postgresql://localhost/db_loyalty?search_path=products")
 				.put("dbUser", "loyalty")
 				.put("dbPassword", "moresecure")
-				.put("endpointsModel", "/Volumes/sdcard/yuki/yuki-toolkit/development-service/files/endpoints-model.mdj");
+				.put("endpointsModel", "/Volumes/sdcard/yuki/yuki-toolkit/development-service/files/endpoints-model.mdj")
+				.mergeIn(current);
 	}
 
 	private void createServer(final Vertx vertx, final Router router, final Promise<Void> startPromise) {
@@ -50,7 +53,8 @@ public class ApiServiceVerticle extends AbstractVerticle {
 		this.httpServer.listen(port, e -> {
 			if (e.failed()) {
 				ApiServiceVerticle.LOGGER.info(String
-						.format("The server cannot be started in port: %s with Verticle %s", port, realClassName));
+						.format("The server cannot be started in port: %s with Verticle %s", port, realClassName), e
+								.cause());
 				return;
 			}
 

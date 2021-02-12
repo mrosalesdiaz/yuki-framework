@@ -8,4 +8,6 @@ public abstract class YukiPluginExtension {
 
 	abstract public Property<String> getSchema();
 
+	abstract public Property<String> getEndpointsModel();
+
 }

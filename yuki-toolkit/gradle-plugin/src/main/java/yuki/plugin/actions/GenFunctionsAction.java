@@ -47,6 +47,7 @@ public class GenFunctionsAction implements Action<Task> {
 		this.developmentService.getDbFunctionDefinitions(yukiPluginParameters)
 				.forEach(f -> {
 					try {
+						System.out.println(f.getFunctionName());
 						this.queryDefinitionsCreator.updateJavaClassDefinition(f, yukiPluginParameters, yukiGenFolder);
 					} catch (final IOException e) {
 						throw new GradleException(

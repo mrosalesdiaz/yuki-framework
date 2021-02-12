@@ -85,7 +85,8 @@ public class DevelopmentService {
 				.target(Endpoints.class, parameters.getServiceUrl()
 						.get());
 
-		final var endpoints = new JsonArray(endpointsResponse.endpoints());
+		final var endpoints = new JsonArray(endpointsResponse.endpoints(parameters.getEndpointsModel()
+				.getOrElse("")));
 
 		return endpoints.stream()
 				.map(JsonObject.class::cast)

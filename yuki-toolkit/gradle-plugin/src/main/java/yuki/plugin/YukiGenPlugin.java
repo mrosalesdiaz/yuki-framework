@@ -1,6 +1,8 @@
 package yuki.plugin;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,10 +46,14 @@ public class YukiGenPlugin implements Plugin<Project> {
 		project.getExtensions()
 				.create("yuki", YukiPluginExtension.class);
 
-		project.task(GenEndpointsAction.TASK_NAME)
+		final Map<String, Object> taskParameters = new HashMap();
+
+		taskParameters.put("group", "yuki");
+
+		project.task(taskParameters, GenEndpointsAction.TASK_NAME)
 				.doLast(injector.getInstance(GenEndpointsAction.class));
 
-		project.task(GenFunctionsAction.TASK_NAME)
+		project.task(taskParameters, GenFunctionsAction.TASK_NAME)
 				.doLast(injector.getInstance(GenFunctionsAction.class));
 
 	}
