@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,7 +44,7 @@ public class QueryProxyInvocator implements InvocationHandler {
 	public void configure(final String query, final Class<?> returnType, final Map<String, Object> parameters) {
 		this.preapring = Stopwatch.createStarted();
 		this.query = query;
-		final var sp = Stopwatch.createStarted();
+		final Stopwatch sp = Stopwatch.createStarted();
 		final String[] parts = query.split(":=");
 		this.parameterOrder = Stream.of(parts).limit(parts.length - 1).map(String::trim).map(this::getLastWord)
 				.toArray(String[]::new);
@@ -53,7 +54,7 @@ public class QueryProxyInvocator implements InvocationHandler {
 	}
 
 	public String getLastWord(final String line) {
-		final var matcher = QueryProxyInvocator.matchNamedParameters.matcher(line);
+		final Matcher matcher = QueryProxyInvocator.matchNamedParameters.matcher(line);
 		if (matcher.find()) {
 
 			return matcher.group(1);
@@ -64,7 +65,7 @@ public class QueryProxyInvocator implements InvocationHandler {
 
 	@Override
 	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-		final var methodName = method.getName();
+		final String methodName = method.getName();
 		if (methodName.equals("getHeaders")) {
 			return this.getHeaders();
 		}
@@ -90,10 +91,10 @@ public class QueryProxyInvocator implements InvocationHandler {
 	private Future<JsonArray> executeQuery() throws SQLException {
 		System.out.println("Preparing: " + this.preapring.elapsed(TimeUnit.MILLISECONDS));
 		final Promise<JsonArray> promise = Promise.promise();
-		final var parameters = Tuple
+		final Tuple parameters = Tuple
 				.tuple(Stream.of(this.parameterOrder).map(this.parameters::get).collect(Collectors.toList()));
 
-		final var gettingConnection = Stopwatch.createStarted();
+		final Stopwatch gettingConnection = Stopwatch.createStarted();
 		this.db.getConnection().preparedQuery(this.query).execute(parameters, ar -> {
 			System.out.println("Getting connection: " + gettingConnection.elapsed(TimeUnit.MILLISECONDS));
 			if (ar.failed()) {
@@ -102,7 +103,7 @@ public class QueryProxyInvocator implements InvocationHandler {
 			}
 
 			final Stopwatch stopwatch = Stopwatch.createStarted();
-			final var jsonArray = new JsonArray();
+			final JsonArray jsonArray = new JsonArray();
 			ar.result().forEach(r -> {
 				final JsonObject jsonObject = new JsonObject();
 

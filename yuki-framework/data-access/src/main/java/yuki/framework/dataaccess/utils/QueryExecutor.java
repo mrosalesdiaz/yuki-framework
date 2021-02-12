@@ -18,13 +18,13 @@ public class QueryExecutor {
 	private Injector injector;
 
 	public <T> T create(final Class<T> queryClass) {
-		var creationExecutor = Stopwatch.createStarted();
+		Stopwatch creationExecutor = Stopwatch.createStarted();
 		final Map<String, Object> internalParameters = new HashMap<>();
-		final var queryDefinitionMetadata = queryClass.getAnnotation(QueryDefinitionMetadata.class);
+		final QueryDefinitionMetadata queryDefinitionMetadata = queryClass.getAnnotation(QueryDefinitionMetadata.class);
 
 		System.out.println("Getting annotation: " + creationExecutor.elapsed(TimeUnit.MILLISECONDS));
 		creationExecutor = Stopwatch.createStarted();
-		final var proxyHandler = this.injector.getInstance(QueryProxyInvocator.class);
+		final QueryProxyInvocator proxyHandler = this.injector.getInstance(QueryProxyInvocator.class);
 		proxyHandler.configure(queryDefinitionMetadata.sql(), queryDefinitionMetadata.returnType(), internalParameters);
 		System.out.println("Initialize configuration: " + creationExecutor.elapsed(TimeUnit.MILLISECONDS));
 		creationExecutor = Stopwatch.createStarted();

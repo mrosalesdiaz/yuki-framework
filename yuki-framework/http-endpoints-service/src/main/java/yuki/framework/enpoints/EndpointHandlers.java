@@ -17,6 +17,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import yuki.framework.endpoints.annotations.EndpointDefinition;
@@ -39,8 +40,8 @@ public class EndpointHandlers {
 	}
 
 	private Set<Class<? extends YukiEndpoint>> getEndpointsDefinitions() {
-		final var reflections = new Reflections("yuki.resources", new TypeAnnotationsScanner(), new SubTypesScanner());
-		final var returnData = new HashSet<Class<? extends YukiEndpoint>>();
+		final Reflections reflections = new Reflections("yuki.resources", new TypeAnnotationsScanner(), new SubTypesScanner());
+		final HashSet returnData = new HashSet<Class<? extends YukiEndpoint>>();
 
 		// TODO: Implement validation of extension type
 		reflections.getTypesAnnotatedWith(EndpointDefinition.class).stream()
@@ -50,8 +51,8 @@ public class EndpointHandlers {
 	}
 
 	private Set<Class<? extends Handler<RoutingContext>>> getExtensionsFromProject(final String extensionsPackage) {
-		final var reflections = new Reflections(extensionsPackage, new TypeAnnotationsScanner(), new SubTypesScanner());
-		final var returnData = new HashSet<Class<? extends Handler<RoutingContext>>>();
+		final Reflections reflections = new Reflections(extensionsPackage, new TypeAnnotationsScanner(), new SubTypesScanner());
+		final HashSet returnData = new HashSet<Class<? extends Handler<RoutingContext>>>();
 
 		// TODO: Implement validation of extension type
 		reflections.getTypesAnnotatedWith(EndpointExtension.class).stream()
@@ -64,7 +65,7 @@ public class EndpointHandlers {
 			final String extensionsPackage) {
 		final Map<Class<? extends YukiEndpoint>, Class<? extends Handler<RoutingContext>>> returnValue = new HashMap<>();
 
-		final var endpointsDefinitions = this.getEndpointsDefinitions();
+		final Set<Class<? extends YukiEndpoint>> endpointsDefinitions = this.getEndpointsDefinitions();
 
 		if (endpointsDefinitions.isEmpty()) {
 			return new HashMap<>();
@@ -89,8 +90,8 @@ public class EndpointHandlers {
 			final Entry<Class<? extends YukiEndpoint>, Class<? extends Handler<RoutingContext>>> mapEndpointAndExtension,
 			final Router apiRouter) {
 
-		final var endpointDefinition = mapEndpointAndExtension.getKey().getAnnotation(EndpointDefinition.class);
-		final var routerInstance = this.injector.getInstance(mapEndpointAndExtension.getKey());
+		final EndpointDefinition endpointDefinition = mapEndpointAndExtension.getKey().getAnnotation(EndpointDefinition.class);
+		final Object routerInstance = this.injector.getInstance(mapEndpointAndExtension.getKey());
 
 		Handler<RoutingContext> handlerRequestClass;
 
@@ -102,7 +103,7 @@ public class EndpointHandlers {
 
 		this.injector.injectMembers(routerInstance);
 
-		final var route = apiRouter.route(endpointDefinition.method(), endpointDefinition.path())
+		final Route route = apiRouter.route(endpointDefinition.method(), endpointDefinition.path())
 				.handler(handlerRequestClass::handle);
 
 		EndpointHandlers.logger.info(String.format("'%1$s' %2$s => %3$s", route.getPath(),

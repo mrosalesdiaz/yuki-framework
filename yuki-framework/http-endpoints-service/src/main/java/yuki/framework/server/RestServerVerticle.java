@@ -1,6 +1,7 @@
 package yuki.framework.server;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -23,7 +24,7 @@ public class RestServerVerticle extends AbstractVerticle {
 	}
 
 	private void createServer(final Vertx vertx, final Router router, final Promise<Void> startPromise) {
-		final var realClassName = this.getClass().getName();
+		final String realClassName = this.getClass().getName();
 		final int port = this.config().getInteger("serverPort", 8080);
 		this.httpServer = vertx.createHttpServer();
 		this.httpServer.requestHandler(router);
@@ -44,13 +45,13 @@ public class RestServerVerticle extends AbstractVerticle {
 	public void start(final Promise<Void> startPromise) throws Exception {
 		RestServerVerticle.logger.info(String.format("Starting API server in verticle: %s", this.deploymentID()));
 
-		final var injector = Guice.createInjector(new GuiceModule());
+		final Injector injector = Guice.createInjector(new GuiceModule());
 
-		final var endpointsHandlers = injector.getInstance(EndpointHandlers.class);
+		final EndpointHandlers endpointsHandlers = injector.getInstance(EndpointHandlers.class);
 
-		final var mainRouter = Router.router(this.vertx);
+		final Router mainRouter = Router.router(this.vertx);
 
-		final var apiRouter = this.createApiRouter(this.vertx);
+		final Router apiRouter = this.createApiRouter(this.vertx);
 
 		mainRouter.mountSubRouter("/api", apiRouter);
 

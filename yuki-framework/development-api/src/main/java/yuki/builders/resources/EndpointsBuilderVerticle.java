@@ -3,12 +3,16 @@ package yuki.builders.resources;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.SimpleName;
@@ -17,6 +21,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -25,6 +30,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -49,7 +55,7 @@ public class EndpointsBuilderVerticle extends AbstractVerticle {
 
 	private String getTemplateContent() {
 		try {
-			final var resourceUri = Resources.getResource(EndpointsBuilderVerticle.class,
+			final URL resourceUri = Resources.getResource(EndpointsBuilderVerticle.class,
 					"/templates/endpoint-template.tpl");
 			return Resources.toString(resourceUri, Charsets.UTF_8);
 		} catch (final IOException e) {
@@ -70,14 +76,14 @@ public class EndpointsBuilderVerticle extends AbstractVerticle {
 			throw new ApiException("Body requst does not contains value");
 		}
 
-		final var compilationUnit = StaticJavaParser.parse(this.getTemplateContent());
+		final CompilationUnit compilationUnit = StaticJavaParser.parse(this.getTemplateContent());
 
-		final var typeDeclaration = compilationUnit.findFirst(TypeDeclaration.class)
+		final TypeDeclaration typeDeclaration = compilationUnit.findFirst(TypeDeclaration.class)
 				.orElseThrow(() -> new ApiException("Java template file for endpoint class is missed"));
 
 		typeDeclaration.setName(endpointName);
 
-		final var annotationExpr = typeDeclaration.getAnnotation(0).asAnnotationExpr();
+		final AnnotationExpr annotationExpr = typeDeclaration.getAnnotation(0).asAnnotationExpr();
 
 		annotationExpr.findAll(MemberValuePair.class).stream().forEach(mvp -> {
 			mvp.findFirst(MemberValuePair.class).ifPresent(e -> {
@@ -99,10 +105,10 @@ public class EndpointsBuilderVerticle extends AbstractVerticle {
 	}
 
 	private void saveJavaFile(final String className, final String javaFileContent) {
-		final var fileName = String.format("%s.java", className);
-		final var javaOutputFolder = Paths.get(this.config().getString("javaOutputFolder",
+		final String fileName = String.format("%s.java", className);
+		final Path javaOutputFolder = Paths.get(this.config().getString("javaOutputFolder",
 				"/Volumes/sdcard/yuki/framework/development-worker/src/main/java/yuki/resources"));
-		final var javaFilePath = javaOutputFolder.resolve(fileName);
+		final Path javaFilePath = javaOutputFolder.resolve(fileName);
 		try (final InputStream content = new ByteArrayInputStream(
 				javaFileContent.toString().getBytes(Charsets.UTF_8))) {
 			Files.copy(content, javaFilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -117,18 +123,18 @@ public class EndpointsBuilderVerticle extends AbstractVerticle {
 		EndpointsBuilderVerticle.logger
 				.info(String.format("Starting Builder API server in verticle: %s", this.deploymentID()));
 
-		final var injector = Guice.createInjector(new GuiceModule());
+		final Injector injector = Guice.createInjector(new GuiceModule());
 
 		injector.injectMembers(this);
 
-		final var mainRouter = Router.router(this.vertx);
+		final Router mainRouter = Router.router(this.vertx);
 
-		final var apiRouter = Router.router(this.vertx);
+		final Router apiRouter = Router.router(this.vertx);
 		apiRouter.route().handler(BodyHandler.create());
 
 		mainRouter.mountSubRouter(this.config().getString("rootContext", "/builder"), apiRouter);
 
-		final var route = apiRouter.post("/endpoints/:className").handler(this::handleClassCreation);
+		final Route route = apiRouter.post("/endpoints/:className").handler(this::handleClassCreation);
 
 		System.out.println(route.getPath());
 		this.createServer(this.vertx, mainRouter, startPromise);

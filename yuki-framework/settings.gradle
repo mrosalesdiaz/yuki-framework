@@ -15,11 +15,11 @@ project(':development-api').projectDir = new File(settingsDir, './development-ap
 include ':http-endpoints-service'
 project(':http-endpoints-service').projectDir = new File(settingsDir, './http-endpoints-service')
 
-include ':dataaccess'
-project(':dataaccess').projectDir = new File(settingsDir, './dataaccess')
+include ':data-access'
+project(':data-access').projectDir = new File(settingsDir, './data-access')
 
-include ':dataschema'
-project(':dataschema').projectDir = new File(settingsDir, './dataschema')
+include ':data-schema'
+project(':data-schema').projectDir = new File(settingsDir, './data-schema')
 
 
 /*
