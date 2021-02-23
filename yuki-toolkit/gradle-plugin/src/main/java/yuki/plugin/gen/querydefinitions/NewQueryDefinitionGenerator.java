@@ -30,8 +30,8 @@ public class NewQueryDefinitionGenerator {
 	public InputStream execute(final String yukiGenQueriesRelativeFolder, final DbFunctionDefinition f,
 			final YukiPluginExtension parameters) throws IOException {
 
-		final var yukiGenQueriesPackage = String.join(".", yukiGenQueriesRelativeFolder.split("\\/"));
-		final var queryDefinitionClass = StaticJavaParser.parse(JavaClassHelper.getJavaTemplateForQueryDefinition());
+		final String yukiGenQueriesPackage = String.join(".", yukiGenQueriesRelativeFolder.split("\\/"));
+		final CompilationUnit queryDefinitionClass = StaticJavaParser.parse(JavaClassHelper.getJavaTemplateForQueryDefinition());
 
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -70,7 +70,7 @@ public class NewQueryDefinitionGenerator {
 				.findFirst(ClassOrInterfaceDeclaration.class)
 				.get();
 
-		final var methodTemplate = classOrInterfaceDeclaration.findFirst(MethodDeclaration.class)
+		final MethodDeclaration methodTemplate = classOrInterfaceDeclaration.findFirst(MethodDeclaration.class)
 				.get()
 				.clone();
 

@@ -44,7 +44,7 @@ public class ApiServiceVerticle extends AbstractVerticle {
 	}
 
 	private void createServer(final Vertx vertx, final Router router, final Promise<Void> startPromise) {
-		final var realClassName = this.getClass()
+		final String realClassName = this.getClass()
 				.getName();
 		final int port = this.config()
 				.getInteger("serverPort", 10009);
@@ -70,7 +70,7 @@ public class ApiServiceVerticle extends AbstractVerticle {
 		ApiServiceVerticle.LOGGER
 				.info(String.format("Starting Development API server in verticle: %s", this.deploymentID()));
 
-		final var injector = Guice.createInjector(new GuiceModule());
+		final Injector injector = Guice.createInjector(new GuiceModule());
 
 		injector.injectMembers(this);
 
@@ -80,9 +80,9 @@ public class ApiServiceVerticle extends AbstractVerticle {
 						startPromise.fail(h.cause());
 					}
 
-					final var mainRouter = Router.router(this.vertx);
+					final Router mainRouter = Router.router(this.vertx);
 
-					final var apiRouter = this.createApiRouter(this.vertx);
+					final Router apiRouter = this.createApiRouter(this.vertx);
 
 					this.createInfoRoute(injector, mainRouter, this.config());
 
@@ -107,13 +107,13 @@ public class ApiServiceVerticle extends AbstractVerticle {
 	}
 
 	private void createFunctionsRoute(final Injector injector, final Router apiRouter) {
-		final var controller = injector.getInstance(PostgreSqlFunctionController.class);
+		final PostgreSqlFunctionController controller = injector.getInstance(PostgreSqlFunctionController.class);
 		apiRouter.get("/:schemaName/functions")
 				.handler(controller::getPostgreSqlFunctions);
 	}
 
 	private void createEndpointsRoute(final Injector injector, final Router apiRouter, final JsonObject config) {
-		final var controller = injector.getInstance(EndpointsController.class);
+		final EndpointsController controller = injector.getInstance(EndpointsController.class);
 		apiRouter.get("/endpoints")
 				.handler(rc -> controller.getEndpoints(rc, config));
 	}

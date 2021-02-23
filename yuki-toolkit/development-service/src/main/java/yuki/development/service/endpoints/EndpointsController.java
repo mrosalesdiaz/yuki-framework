@@ -29,7 +29,7 @@ public class EndpointsController {
 			return;
 		}
 
-		final var jsonArray = Stream.of(this.resourcesTree.getResourceList())
+		final JsonArray jsonArray = Stream.of(this.resourcesTree.getResourceList())
 				.map(e -> new JsonObject().put("path", e[0])
 						.put("className", e[1])
 						.put("method", e[2]))

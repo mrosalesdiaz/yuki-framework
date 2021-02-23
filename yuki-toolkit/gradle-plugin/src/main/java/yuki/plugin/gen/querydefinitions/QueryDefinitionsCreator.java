@@ -3,6 +3,7 @@ package yuki.plugin.gen.querydefinitions;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 
 import javax.inject.Inject;
@@ -27,7 +28,7 @@ public class QueryDefinitionsCreator {
 
 		this.prepareFolderStructure(genYukiFolder, QueryDefinitionsCreator.YUKI_GEN_QUERIES);
 
-		try (var resultInputStream = this.newQueryDefinitionGenerator
+		try (InputStream resultInputStream = this.newQueryDefinitionGenerator
 				.execute(QueryDefinitionsCreator.YUKI_GEN_QUERIES, f, parameters)) {
 			try (FileOutputStream javaFileOutputStream = new FileOutputStream(finalJavaFilePath)) {
 				ByteStreams.copy(resultInputStream, javaFileOutputStream);

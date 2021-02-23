@@ -52,7 +52,7 @@ public class PostgreSqlFunctionControllerTest {
 	@Test
 	void Should_obtain_one_function_definition_When_it_called_with_schema_parameter() throws Throwable {
 
-		final var pgClient = Mockito.mock(PgPool.class);
+		final PgPool pgClient = Mockito.mock(PgPool.class);
 		Mockito.doReturn(pgClient)
 				.when(this.db)
 				.getConnection();
@@ -62,8 +62,8 @@ public class PostgreSqlFunctionControllerTest {
 				.when(pgClient)
 				.query(ArgumentMatchers.any());
 
-		final var parameterRc = Mockito.mock(RoutingContext.class);
-		final var responseObject = Mockito.mock(HttpServerResponse.class);
+		final RoutingContext parameterRc = Mockito.mock(RoutingContext.class);
+		final HttpServerResponse responseObject = Mockito.mock(HttpServerResponse.class);
 
 		Mockito.doReturn(responseObject)
 				.when(parameterRc)

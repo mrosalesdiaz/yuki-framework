@@ -33,7 +33,7 @@ public class ResourcesTree {
 	}
 
 	private JsonObject parseToJsonObject(final Path starUmlFile) throws IOException {
-		return new JsonObject(Files.readString(starUmlFile));
+		return new JsonObject(new String(Files.readAllBytes(starUmlFile)));
 	}
 
 	private void processNodes(final JsonObject rootJsonObject) {
@@ -42,10 +42,10 @@ public class ResourcesTree {
 
 		new ArrayList<ResourceNode>();
 
-		final var allObject = new Stack<ResourceNode>();
+		final Stack<ResourceNode> allObject = new Stack<ResourceNode>();
 		for (final JsonObject umlObject : PluginHelper.getUMLObjects(this.cachedStarUmlContent)) {
 
-			final var node = new ResourceNode();
+			final ResourceNode node = new ResourceNode();
 			node.name = umlObject.getString("name", "<noname>");
 			node.method = this.getClassifier(umlObject);
 			node.props.put("_id", umlObject.getString("_id", "<noname>"));
@@ -53,17 +53,17 @@ public class ResourcesTree {
 			allObject.add(node);
 		}
 
-		final var links = new Stack<JsonObject>();
+		final Stack<JsonObject> links = new Stack<JsonObject>();
 
 		PluginHelper.getUMLLinks(this.cachedStarUmlContent).forEach(links::add);
 
 		while (links.size() > 0) {
-			final var link = links.pop();
+			final JsonObject link = links.pop();
 
-			final var parent = allObject.stream()
+			final ResourceNode parent = allObject.stream()
 					.filter(u -> Objects.equals(u.props.get("_id"), link.getJsonObject("_parent").getString("$ref")))
 					.findFirst().get();
-			final var children = allObject.stream().filter(u -> Objects.equals(u.props.get("_id"),
+			final ResourceNode children = allObject.stream().filter(u -> Objects.equals(u.props.get("_id"),
 					link.getJsonObject("end2").getJsonObject("reference").getString("$ref"))).findFirst().get();
 
 			System.out.println("Parent: " + parent.name);
@@ -90,7 +90,7 @@ public class ResourcesTree {
 	}
 
 	private String getClassifier(final JsonObject umlObject) {
-		final var classifier = umlObject.getValue("classifier");
+		final Object classifier = umlObject.getValue("classifier");
 		if (classifier == null) {
 			return "<nomethod>";
 		}
@@ -103,9 +103,9 @@ public class ResourcesTree {
 	}
 
 	public String[][] getResourceList() {
-		final var rootNode = this.nodes.get(0);
+		final ResourceNode rootNode = this.nodes.get(0);
 
-		final var stringBuilder = new StringBuilder();
+		final StringBuilder stringBuilder = new StringBuilder();
 
 		this.traverse(rootNode, stringBuilder, "");
 
@@ -115,8 +115,8 @@ public class ResourcesTree {
 
 	private void traverse(final ResourceNode rootNode, final StringBuilder stringBuilder, final String path) {
 
-		for (var i = 0; i < rootNode.children.size(); i++) {
-			final var node = rootNode.children.toArray(new ResourceNode[0])[i];
+		for (int i = 0; i < rootNode.children.size(); i++) {
+			final ResourceNode node = rootNode.children.toArray(new ResourceNode[0])[i];
 
 			this.traverse(node, stringBuilder, path + rootNode.paths.get(i));
 		}

@@ -16,6 +16,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -39,7 +40,7 @@ public class PostgreSqlFunctionController {
 
 	public void getPostgreSqlFunctions(final RoutingContext rc) {
 		try {
-			final var schema = rc.request()
+			final String schema = rc.request()
 					.getParam("schemaName");
 			final String query = Resources.toString(Resources
 					.getResource(this.getClass(), "/sql/get-functions-definitions.sql"), Charsets.UTF_8);
@@ -51,7 +52,7 @@ public class PostgreSqlFunctionController {
 							return;
 						}
 
-						var responseEntity = new JsonArray();
+						JsonArray responseEntity = new JsonArray();
 
 						try {
 							responseEntity = a.result()
@@ -82,7 +83,7 @@ public class PostgreSqlFunctionController {
 	}
 
 	private Comparator<JsonObject> postSortingForSuffixNaming() {
-		return new Comparator<>() {
+		return new Comparator<JsonObject>() {
 
 			@Override
 			public int compare(final JsonObject o1, final JsonObject o2) {
@@ -107,8 +108,8 @@ public class PostgreSqlFunctionController {
 
 		return obj -> {
 
-			final var string = obj.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME);
-			final var className = obj.getString(PostgreSqlFunctionController.COLUMN_CLASS_NAME);
+			final String string = obj.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME);
+			final String className = obj.getString(PostgreSqlFunctionController.COLUMN_CLASS_NAME);
 
 			nameStore.put(string, nameStore.getOrDefault(string, -1) + 1);
 
@@ -125,8 +126,8 @@ public class PostgreSqlFunctionController {
 		final Map<String, Integer> names = new HashMap<>();
 		for (int i = 0; i < responseEntity.size(); i++) {
 			final JsonObject obj = responseEntity.getJsonObject(i);
-			final var string = obj.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME);
-			final var className = obj.getString(PostgreSqlFunctionController.COLUMN_CLASS_NAME);
+			final String string = obj.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME);
+			final String className = obj.getString(PostgreSqlFunctionController.COLUMN_CLASS_NAME);
 
 			names.put(string, names.getOrDefault(string, -1) + 1);
 
@@ -163,9 +164,9 @@ public class PostgreSqlFunctionController {
 			return jsonObject;
 		}
 
-		final var functionName = jsonObject.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME, "ErrorName");
+		final String functionName = jsonObject.getString(PostgreSqlFunctionController.COLUMN_FUNCTION_NAME, "ErrorName");
 
-		final var className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, functionName);
+		final String className = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, functionName);
 
 		jsonObject.put(PostgreSqlFunctionController.COLUMN_CLASS_NAME, className);
 

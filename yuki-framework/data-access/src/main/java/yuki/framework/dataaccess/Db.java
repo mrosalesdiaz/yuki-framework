@@ -8,20 +8,37 @@ import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 
+/**
+ * Singleton class to access database connection.
+ *
+ * It depends on {@link DbConfigurator} in order to configure url connection.
+ *
+ * @author mrosalesdiaz
+ *
+ */
 @Singleton
 public class Db {
-    private PgPool client;
-    
-    void init(final JsonObject configuration, Vertx vertx) {
-        
-        PgConnectOptions connectOptions = PgConnectOptions.fromUri(configuration.getString("jdbcUrl"))
-                .setUser(configuration.getString("dbUser")).setPassword(configuration.getString("dbPassword"));
-        
-        PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
-        this.client = PgPool.pool( connectOptions, poolOptions);
-    }
-    
-    public PgPool getConnection() {
-        return this.client;
-    }
+	private PgPool client;
+
+	/**
+	 * @param configuration set of parameters to configure the connection. Following
+	 *                      parameters are supported: dbUser,dbPassword and jdbcUrl.
+	 * @param vertx         vertx instance to use at time pool is created.
+	 */
+	public void init(final JsonObject configuration, final Vertx vertx) {
+
+		final PgConnectOptions connectOptions = PgConnectOptions.fromUri(configuration.getString("jdbcUrl"))
+				.setUser(configuration.getString("dbUser"))
+				.setPassword(configuration.getString("dbPassword"));
+
+		final PoolOptions poolOptions = new PoolOptions();
+		this.client = PgPool.pool(vertx, connectOptions, poolOptions);
+	}
+
+	/**
+	 * @return a connection create from database pool
+	 */
+	public PgPool getConnection() {
+		return this.client;
+	}
 }

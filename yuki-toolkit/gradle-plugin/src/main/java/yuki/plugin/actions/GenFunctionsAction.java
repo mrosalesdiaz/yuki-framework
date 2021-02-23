@@ -30,14 +30,14 @@ public class GenFunctionsAction implements Action<Task> {
 	@Override
 	public void execute(final Task task) {
 
-		final var yukiPluginParameters = task.getProject()
+		final YukiPluginExtension yukiPluginParameters = task.getProject()
 				.getExtensions()
 				.getByType(YukiPluginExtension.class);
 
-		final var sourceFolder = new File(task.getProject()
+		final File sourceFolder = new File(task.getProject()
 				.relativePath(GenFunctionsAction.SRC_MAIN_GEN_YUKI));
 
-		final var yukiGenFolder = Paths.get(task.getProject()
+		final File yukiGenFolder = Paths.get(task.getProject()
 				.getProjectDir()
 				.toString(), sourceFolder.toString())
 				.toFile();

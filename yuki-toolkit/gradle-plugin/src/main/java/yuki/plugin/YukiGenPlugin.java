@@ -3,13 +3,16 @@ package yuki.plugin;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -39,7 +42,7 @@ public class YukiGenPlugin implements Plugin<Project> {
 		final Injector injector = Guice.createInjector(new GuiceModule());
 		injector.injectMembers(this);
 
-		final var sourceFolder = new File(project.relativePath(YukiGenPlugin.SRC_MAIN_GEN_YUKI));
+		final File sourceFolder = new File(project.relativePath(YukiGenPlugin.SRC_MAIN_GEN_YUKI));
 
 		this.addGenYukiSourceFolder(project, sourceFolder);
 
@@ -59,12 +62,12 @@ public class YukiGenPlugin implements Plugin<Project> {
 	}
 
 	private File addGenYukiSourceFolder(final Project project, final File sourceFolder) {
-		final var javaPlugin = project.getConvention()
+		final JavaPluginConvention javaPlugin = project.getConvention()
 				.getPlugin(JavaPluginConvention.class);
-		final var sourceSets = javaPlugin.getSourceSets();
-		final var mainSourceSet2 = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-		final var java = mainSourceSet2.getJava();
-		final var folder = java.getSrcDirs();
+		final SourceSetContainer sourceSets = javaPlugin.getSourceSets();
+		final SourceSet mainSourceSet2 = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+		final SourceDirectorySet java = mainSourceSet2.getJava();
+		final Set<File> folder = java.getSrcDirs();
 
 		folder.add(sourceFolder);
 		java.setSrcDirs(folder);

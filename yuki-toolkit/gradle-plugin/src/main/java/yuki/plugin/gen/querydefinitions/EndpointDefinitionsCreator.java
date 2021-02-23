@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -19,7 +20,7 @@ public class EndpointDefinitionsCreator {
 
 	public void createEndpoint(final EndpointDefinition endpoint, final Path folder)
 			throws UnsupportedEncodingException, IOException {
-		final var endPointClass = StaticJavaParser.parse(PluginHelper.getJavaTemplateForResources());
+		final CompilationUnit endPointClass = StaticJavaParser.parse(PluginHelper.getJavaTemplateForResources());
 
 		endPointClass.findFirst(ClassOrInterfaceDeclaration.class)
 				.get()
@@ -46,7 +47,7 @@ public class EndpointDefinitionsCreator {
 					}
 				});
 
-		final var outputFile = folder.resolve("yuki/resources")
+		final Path outputFile = folder.resolve("yuki/resources")
 				.resolve(String.format("%s.java", endpoint.getClassName()));
 
 		outputFile.getParent()

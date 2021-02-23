@@ -34,7 +34,7 @@ public class DevelopmentService {
 				.target(DbFunctions.class, parameters.getServiceUrl()
 						.get());
 
-		final var functions = new JsonArray(dbFunctions.functions(parameters.getSchema()
+		final JsonArray functions = new JsonArray(dbFunctions.functions(parameters.getSchema()
 				.get()));
 
 		return functions.stream()
@@ -44,7 +44,7 @@ public class DevelopmentService {
 	}
 
 	private DbFunctionDefinition parseJsonObjectToDbFunctionDefinition(final JsonObject jsonObject) {
-		final var instance = new DbFunctionDefinition();
+		final DbFunctionDefinition instance = new DbFunctionDefinition();
 
 		instance.setName(jsonObject.getString("className"));
 		instance.setFunctionName(jsonObject.getString("functionName"));
@@ -64,7 +64,7 @@ public class DevelopmentService {
 	}
 
 	private EndpointDefinition parseJsonObjectToEndpoint(final JsonObject jsonObject) {
-		final var instance = new EndpointDefinition();
+		final EndpointDefinition instance = new EndpointDefinition();
 
 		instance.setPath(jsonObject.getString("path"));
 		instance.setClassName(jsonObject.getString("className"));
@@ -85,7 +85,7 @@ public class DevelopmentService {
 				.target(Endpoints.class, parameters.getServiceUrl()
 						.get());
 
-		final var endpoints = new JsonArray(endpointsResponse.endpoints(parameters.getEndpointsModel()
+		final JsonArray endpoints = new JsonArray(endpointsResponse.endpoints(parameters.getEndpointsModel()
 				.getOrElse("")));
 
 		return endpoints.stream()

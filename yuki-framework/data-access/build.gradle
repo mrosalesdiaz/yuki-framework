@@ -14,9 +14,12 @@ dependencies {
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
 	
-	 testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testCompile("org.assertj:assertj-core:3.11.1")
+    testCompile("io.vertx:vertx-junit5:3.9.4")
+    
     
 }
 
@@ -33,5 +36,16 @@ publishing {
         maven {
             url = "file://Volumes/sdcard/yuki/local_publish"
         }
+    }
+}
+
+test {
+// TODO: not used right now
+	useJUnitPlatform()
+
+    maxHeapSize = '1G'
+    testLogging {
+        //events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+        events "PASSED", "FAILED"
     }
 }
