@@ -35,7 +35,7 @@ public class Test_DatabaseConnection {
 
 	@Test
 	void Should_return_an_active_connection_When_it_is_well_configure() {
-		final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost/db_hatunmayu")
+		final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost/db_levi")
 				.put("dbUser", "postgres")
 				.put("dbPassword", "not24get");
 
@@ -48,7 +48,7 @@ public class Test_DatabaseConnection {
 	@Test()
 	void Should_thrown_exception_When_configuration_is_wrong() {
 		org.junit.jupiter.api.Assertions.assertThrows(DbConfigurationException.class, () -> {
-			final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost_/db_hatunmayu")
+			final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost_/db_levi")
 					.put("dbUser", "postgres")
 					.put("dbPassword", "not24get");
 

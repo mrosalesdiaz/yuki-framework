@@ -49,7 +49,7 @@ public class YukiGenPlugin implements Plugin<Project> {
 		project.getExtensions()
 				.create("yuki", YukiPluginExtension.class);
 
-		final Map<String, Object> taskParameters = new HashMap();
+		final Map<String, Object> taskParameters = new HashMap<>();
 
 		taskParameters.put("group", "yuki");
 

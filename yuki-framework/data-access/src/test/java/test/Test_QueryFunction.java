@@ -36,7 +36,6 @@ import yuki.framework.dataaccess.utils.DatabaseExecutionException;
 import yuki.framework.dataaccess.utils.QueryDefinition;
 import yuki.framework.dataaccess.utils.QueryExecutor;
 
-@DisplayName("ss")
 @ExtendWith(VertxExtension.class)
 public class Test_QueryFunction {
 
@@ -57,8 +56,8 @@ public class Test_QueryFunction {
 
 		injector.injectMembers(this);
 
-		final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost/db_hatunmayu")
-				.put("dbUser", "hatunmayu")
+		final JsonObject jdbcConfiguration = new JsonObject().put("jdbcUrl", "postgresql://localhost/db_levi")
+				.put("dbUser", "levi")
 				.put("dbPassword", "moresecure");
 
 		final Vertx vertx = Vertx.vertx();
@@ -247,7 +246,7 @@ public class Test_QueryFunction {
 				.onFailure(vertxTestContext::failNow);
 	}
 
-	@Test
+	//@Test
 	@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
 	void Should_return_instant_When_instant_parameter_is_passed(final VertxTestContext vertxTestContext)
 			throws Throwable {

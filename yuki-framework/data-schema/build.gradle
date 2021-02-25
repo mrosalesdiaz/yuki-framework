@@ -29,12 +29,12 @@ flyway {
     schemas = ['lobby']
 }
 
-group = 'org.yuki'
-version = '1.0'
-
 publishing {
 	publications {
         dataschema(MavenPublication) {
+        	groupId = 'org.yuki'
+            artifactId = 'data-schema'
+            version = '1.0'
             from components.java
         }
     }

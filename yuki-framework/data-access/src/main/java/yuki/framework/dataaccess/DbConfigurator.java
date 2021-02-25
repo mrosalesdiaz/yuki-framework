@@ -2,11 +2,10 @@ package yuki.framework.dataaccess;
 
 import javax.inject.Inject;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import yuki.framework.dataaccess.utils.DbConfigurationException;
 
 /**
  * Database configuration object it configures the connections and also test the
@@ -16,53 +15,48 @@ import yuki.framework.dataaccess.utils.DbConfigurationException;
  *
  */
 public class DbConfigurator {
-	@Inject
-	private Db db;
+    @Inject
+    private Db db;
 
-	/**
-	 * @param configuration set of parameters to configure the connection. Following
-	 *                      parameters are supported: dbUser,dbPassword and jdbcUrl.
-	 * @param vertx         vertx instance to use at time pool is created.
-	 */
-	public void init(final JsonObject configuration, final Vertx vertx) {
-		try {
-			this.db.init(configuration, vertx);
-			this.preInitialize();
-		} catch (final Throwable e) {
-			throw new DbConfigurationException("Error trying to pre-initialize the connection", e);
-		}
-	}
+    /**
+     * @param vertx             Instance to use at time pool is created.
+     *                          Configurations must be passed with following
+     *                          properties in the Json object configuration:<br>
+     *                          <ul>
+     *                          <li>dbUser: database user name</li>
+     *                          <li>dbPassword: database user password</li>
+     *                          <li>jdbcUrl: url to connect the Postgresql database.
+     *                          ex:
+     *                          postgresql://localhost/db_levi?search_path=authentication</li>
+     *                          </ul>
+     * @param completionHandler handler for async completion
+     */
+    public void init(final Vertx vertx,
+            final Handler<AsyncResult<Void>> completionHandler) {
+        try {
+            this.db.init(vertx.getOrCreateContext().config(), vertx);
 
-	/**
-	 * Test connection by executing a simple dummy query
-	 *
-	 * @throws Throwable if any unexpected error arises
-	 */
-	private void preInitialize() throws Throwable {
-		final Promise<Void> promise = Promise.promise();
+            this.preInitialize(completionHandler);
+        } catch (final Throwable e) {
+            completionHandler.handle(Future.failedFuture(e));
+            return;
+        }
+    }
 
-		this.db.getConnection()
-				.query(" select 'chanchito' ")
-				.execute(r -> {
-					if (r.failed()) {
-						promise.fail(r.cause());
-						return;
-					}
+    /**
+     * Test connection by executing a simple dummy query
+     *
+     * @param completionHandler to notify when completed
+     *
+     */
+    private void preInitialize(final Handler<AsyncResult<Void>> completionHandler) {
+        this.db.getConnection().query(" select 'chanchito' ").execute(r -> {
+            if (r.failed()) {
+                completionHandler.handle(Future.failedFuture(r.cause()));
+                return;
+            }
 
-					promise.complete();
-				});
-
-		final Future<Void> future = promise.future();
-
-		while (!future.isComplete()) {
-			try {
-				Thread.sleep(50);
-			} catch (final Exception e) {
-			}
-		}
-
-		if (future.failed()) {
-			throw future.cause();
-		}
-	}
+            completionHandler.handle(Future.succeededFuture());
+        });
+    }
 }

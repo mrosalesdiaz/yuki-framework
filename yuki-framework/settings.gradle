@@ -9,8 +9,8 @@
 
 rootProject.name = 'yuki-framework'
 
-include ':development-api'
-project(':development-api').projectDir = new File(settingsDir, './development-api')
+//include ':development-api'
+//project(':development-api').projectDir = new File(settingsDir, './development-api')
 
 include ':http-endpoints-service'
 project(':http-endpoints-service').projectDir = new File(settingsDir, './http-endpoints-service')

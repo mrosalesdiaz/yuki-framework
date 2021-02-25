@@ -21,6 +21,13 @@ public class Db {
 	private PgPool client;
 
 	/**
+	 * @return a connection create from database pool
+	 */
+	public PgPool getConnection() {
+		return this.client;
+	}
+
+	/**
 	 * @param configuration set of parameters to configure the connection. Following
 	 *                      parameters are supported: dbUser,dbPassword and jdbcUrl.
 	 * @param vertx         vertx instance to use at time pool is created.
@@ -28,17 +35,9 @@ public class Db {
 	public void init(final JsonObject configuration, final Vertx vertx) {
 
 		final PgConnectOptions connectOptions = PgConnectOptions.fromUri(configuration.getString("jdbcUrl"))
-				.setUser(configuration.getString("dbUser"))
-				.setPassword(configuration.getString("dbPassword"));
+				.setUser(configuration.getString("dbUser")).setPassword(configuration.getString("dbPassword"));
 
 		final PoolOptions poolOptions = new PoolOptions();
 		this.client = PgPool.pool(vertx, connectOptions, poolOptions);
-	}
-
-	/**
-	 * @return a connection create from database pool
-	 */
-	public PgPool getConnection() {
-		return this.client;
 	}
 }

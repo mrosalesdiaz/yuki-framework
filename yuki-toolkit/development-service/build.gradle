@@ -27,12 +27,13 @@ dependencies {
 	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
 }
 
-group = 'org.yuki'
-version = '1.0'
-
 publishing {
 	publications {
         developmentService(MavenPublication) {
+            groupId = 'org.yuki'
+            artifactId = 'development-service'
+            version = '1.0'
+            
             from components.java
         }
     }
