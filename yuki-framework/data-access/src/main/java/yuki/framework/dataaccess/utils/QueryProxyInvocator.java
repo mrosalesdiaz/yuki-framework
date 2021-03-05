@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,137 +31,146 @@ import yuki.framework.dataaccess.Db;
 
 public class QueryProxyInvocator implements InvocationHandler {
 
-	@Inject
-	private Db db;
+    private final static Pattern matchNamedParameters = Pattern.compile("\\b(\\w+)\\W*$");
 
-	private String query = " select '' as result ";
+    @Inject
+    private Db db;
 
-	private Map<String, Object> parameters;
+    private String parameterOrder[];
 
-	private String parameterOrder[];
+    private Map<String, Object> parameters;
 
-	private final static Pattern matchNamedParameters = Pattern.compile("\\b(\\w+)\\W*$");
+    private String query = " select '' as result ";
 
-	public void configure(final String query, final Class<?> returnType, final Map<String, Object> parameters) {
-		this.query = query;
-		final String[] parts = query.split(":=");
-		this.parameterOrder = Stream.of(parts)
-				.limit(parts.length - 1)
-				.map(String::trim)
-				.map(this::getLastWord)
-				.toArray(String[]::new);
-		this.parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		this.parameters.putAll(parameters);
-	}
+    public void configure(final String query, final Class<?> returnType, final Map<String, Object> parameters) {
+        this.query = query;
+        final String[] parts = query.split(":=");
+        this.parameterOrder = Stream.of(parts)
+                .limit(parts.length - 1)
+                .map(String::trim)
+                .map(this::getLastWord)
+                .toArray(String[]::new);
+        this.parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        this.parameters.putAll(parameters);
+    }
 
-	private String getLastWord(final String line) {
-		final Matcher matcher = QueryProxyInvocator.matchNamedParameters.matcher(line);
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
+    private Future<JsonArray> executeQuery() throws SQLException {
+        final Promise<JsonArray> promise = Promise.promise();
+        final Tuple parameters = Tuple.tuple(Stream.of(this.parameterOrder)
+                .map(this.parameters::get)
+                .collect(Collectors.toList()));
 
-		throw new RuntimeException(String.format("Error parsing the parameter from parameter line: %s", line));
-	}
+        if (this.db.getConnection() == null) {
+            promise.fail(new NullPointerException("Database connection is null"));
+            return promise.future();
+        }
 
-	@Override
-	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-		final String methodName = method.getName();
+        this.db.getConnection()
+                .preparedQuery(this.query)
+                .execute(parameters, ar -> {
+                    if (ar.failed()) {
+                        promise.fail(new DatabaseExecutionException(ar.cause()));
+                        return;
+                    }
 
-		if (methodName.equals("execute")) {
-			return this.executeQuery();
-		}
+                    final JsonArray jsonArray = new JsonArray();
 
-		if (methodName.startsWith("set")) {
-			this.setParameter(methodName.substring(3), args[0]);
-		}
+                    ar.result()
+                            .forEach(r -> {
+                                if (r == null) {
+                                    promise.fail(new ProcessDataException("Result from Database is null."));
+                                    return;
+                                }
 
-		return proxy;
-	}
+                                try {
+                                    final JsonObject jsonObject = new JsonObject();
 
-	private void setParameter(final String parameterName, final Object parameterValue) {
-		if (parameterValue == null) {
-			return;
-		}
+                                    for (int i = 0; i < r.size(); i++) {
+                                        jsonObject.put(r.getColumnName(i), this.processColumnValue(r.getValue(i)));
+                                    }
 
-		if (parameterValue instanceof InputStream) {
-			try {
-				this.parameters
-						.put(parameterName, Buffer.buffer(ByteStreams.toByteArray((InputStream) parameterValue)));
-			} catch (final IOException e) {
-				throw new ParameterValueException(
-						String.format("Error setting the parameter value for: %s", parameterName), e);
-			}
+                                    jsonArray.add(jsonObject);
+                                } catch (final Exception e) {
+                                    promise.fail(new ProcessDataException("Error converting row data into json."));
+                                }
+                            });
 
-			return;
-		}
+                    promise.complete(jsonArray);
+                });
 
-		if (parameterValue instanceof Instant) {
-			this.parameters.put(parameterName, ((Instant) parameterValue).atOffset(ZoneOffset.ofHours(0))
-					.toLocalDateTime());
-			return;
-		}
+        return promise.future();
+    }
 
-		this.parameters.put(parameterName, parameterValue);
-	}
+    private String getLastWord(final String line) {
+        final Matcher matcher = QueryProxyInvocator.matchNamedParameters.matcher(line);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
 
-	private Future<JsonArray> executeQuery() throws SQLException {
-		final Promise<JsonArray> promise = Promise.promise();
-		final Tuple parameters = Tuple.tuple(Stream.of(this.parameterOrder)
-				.map(this.parameters::get)
-				.collect(Collectors.toList()));
+        throw new RuntimeException(String.format("Error parsing the parameter from parameter line: %s", line));
+    }
 
-		this.db.getConnection()
-				.preparedQuery(this.query)
-				.execute(parameters, ar -> {
-					if (ar.failed()) {
-						promise.fail(new DatabaseExecutionException(ar.cause()));
-						return;
-					}
+    @Override
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+        final String methodName = method.getName();
 
-					final JsonArray jsonArray = new JsonArray();
+        if (methodName.equals("execute")) {
+            return this.executeQuery();
+        }
 
-					ar.result()
-							.forEach(r -> {
-								if (r == null) {
-									promise.fail(new ProcessDataException("Result from Database is null."));
-									return;
-								}
+        if (methodName.startsWith("set")) {
+            this.setParameter(methodName.substring(3), args[0]);
+        }
 
-								try {
-									final JsonObject jsonObject = new JsonObject();
+        return proxy;
+    }
 
-									for (int i = 0; i < r.size(); i++) {
-										jsonObject.put(r.getColumnName(i), this.processColumnValue(r.getValue(i)));
-									}
+    private Object processColumnValue(final Object value) {
+        if (value instanceof Buffer) {
+            return ((Buffer) value).getBytes();
+        }
 
-									jsonArray.add(jsonObject);
-								} catch (final Exception e) {
-									promise.fail(new ProcessDataException("Error converting row data into json."));
-								}
-							});
+        if (value instanceof LocalDate) {
+            return ((LocalDate) value).atStartOfDay()
+                    .toInstant(ZoneOffset.ofHours(0));
+        }
 
-					promise.complete(jsonArray);
-				});
+        if (value instanceof LocalDateTime) {
+            return ((LocalDateTime) value).toInstant(ZoneOffset.ofHours(0));
+        }
 
-		return promise.future();
-	}
+        if (value instanceof UUID) {
+            return value.toString();
+        }
 
-	private Object processColumnValue(final Object value) {
-		if (value instanceof Buffer) {
-			return ((Buffer) value).getBytes();
-		}
+        return value;
 
-		if (value instanceof LocalDate) {
-			return ((LocalDate) value).atStartOfDay()
-					.toInstant(ZoneOffset.ofHours(0));
-		}
+    }
 
-		if (value instanceof LocalDateTime) {
-			return ((LocalDateTime) value).toInstant(ZoneOffset.ofHours(0));
-		}
+    private void setParameter(final String parameterName, final Object parameterValue) {
+        if (parameterValue == null) {
+            return;
+        }
 
-		return value;
+        if (parameterValue instanceof InputStream) {
+            try {
+                this.parameters
+                        .put(parameterName, Buffer.buffer(ByteStreams.toByteArray((InputStream) parameterValue)));
+            } catch (final IOException e) {
+                throw new ParameterValueException(
+                        String.format("Error setting the parameter value for: %s", parameterName), e);
+            }
 
-	}
+            return;
+        }
+
+        if (parameterValue instanceof Instant) {
+            this.parameters.put(parameterName, ((Instant) parameterValue).atOffset(ZoneOffset.ofHours(0))
+                    .toLocalDateTime());
+            return;
+        }
+
+        this.parameters.put(parameterName, parameterValue);
+    }
 
 }

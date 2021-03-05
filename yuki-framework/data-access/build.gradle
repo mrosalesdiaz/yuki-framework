@@ -14,11 +14,15 @@ dependencies {
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
 	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
 	
+	
 	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
 	//testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testCompile("org.assertj:assertj-core:3.11.1")
     testCompile("io.vertx:vertx-junit5:3.9.4")
+    testCompile project(':test-helper')
+    testCompile project(':data-schema')
+    testCompile group: 'io.vertx', name: 'vertx-config', version: '3.9.4'
     
     testImplementation(platform('org.junit:junit-bom:5.7.1'))
 	testImplementation('org.junit.jupiter:junit-jupiter')

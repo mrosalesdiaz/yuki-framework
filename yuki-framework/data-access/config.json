@@ -1,0 +1,5 @@
+{
+	"dbUser":"levi",
+	"dbPassword":"moresecure",
+	"jdbcUrl":"postgresql://localhost/db_levi?search_path=unittest"
+}

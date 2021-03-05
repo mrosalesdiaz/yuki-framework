@@ -21,6 +21,9 @@ project(':data-access').projectDir = new File(settingsDir, './data-access')
 include ':data-schema'
 project(':data-schema').projectDir = new File(settingsDir, './data-schema')
 
+include ':test-helper'
+project(':test-helper').projectDir = new File(settingsDir, './test-helper')
+
 
 /*
 include ':shootory-annotations'
