@@ -1,4 +1,4 @@
-package test.common;
+package test.dataaccess.common;
 
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;

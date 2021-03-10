@@ -1,6 +1,9 @@
-package test;
+package test.dataaccess;
 
-import java.util.concurrent.TimeUnit;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,10 +12,7 @@ import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.util.concurrent.TimeUnit;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -31,19 +31,20 @@ import yuki.framework.dataaccess.DbConfigurator;
 @DisplayNameGeneration(ReplaceUnderscores.class)
 public class Test_DatabaseConnection {
 
-    public static ConfigRetriever loadConfiguration(final Vertx vertx, final String value) {
-        final ConfigStoreOptions configStoreOptions = new ConfigStoreOptions().setType("file")
-                .setConfig(new JsonObject().put("path", value));
-
-        final ConfigRetrieverOptions configRetrieverOptions = new ConfigRetrieverOptions().addStore(configStoreOptions);
-        return ConfigRetriever.create(vertx, configRetrieverOptions);
-    }
-
     @Inject
     private Db db;
-
     @Inject
     private DbConfigurator dbConfigurator;
+
+    public static ConfigRetriever loadConfiguration(final Vertx vertx, final String value) {
+        final ConfigStoreOptions configStoreOptions = new ConfigStoreOptions()
+                .setType("file")
+                .setConfig(new JsonObject().put("path", value));
+        final ConfigRetrieverOptions configRetrieverOptions = new ConfigRetrieverOptions()
+                .addStore(configStoreOptions);
+
+        return ConfigRetriever.create(vertx, configRetrieverOptions);
+    }
 
     @BeforeEach
     void initialize() {
@@ -57,7 +58,7 @@ public class Test_DatabaseConnection {
     @Test
     @Timeout(value = 60, timeUnit = TimeUnit.SECONDS)
     void Should_return_an_active_connection_When_it_is_well_configure(final Vertx vertx,
-            final VertxTestContext testContext) {
+                                                                      final VertxTestContext testContext) {
 
         final ConfigRetriever configRetriever = Test_DatabaseConnection.loadConfiguration(vertx, "./config.json");
 
@@ -86,7 +87,7 @@ public class Test_DatabaseConnection {
 
     @Test()
     void Should_thrown_exception_When_password_is_wrong(final Vertx vertx,
-            final VertxTestContext testContext) {
+                                                        final VertxTestContext testContext) {
         final ConfigRetriever configRetriever = Test_DatabaseConnection.loadConfiguration(vertx, "./config.json");
 
         final Promise<JsonObject> promiseReadConfig = Promise.promise();

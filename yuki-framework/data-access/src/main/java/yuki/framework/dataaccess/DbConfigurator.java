@@ -25,7 +25,7 @@ public class DbConfigurator {
      *                          <ul>
      *                          <li>dbUser: database user name</li>
      *                          <li>dbPassword: database user password</li>
-     *                          <li>jdbcUrl: url to connect the Postgresql database.
+     *                          <li>jdbcUrl: url to connect the PostgresSQL database.
      *                          ex:
      *                          postgresql://localhost/db_levi?search_path=authentication</li>
      *                          </ul>
@@ -39,7 +39,6 @@ public class DbConfigurator {
             this.preInitialize(completionHandler);
         } catch (final Throwable e) {
             completionHandler.handle(Future.failedFuture(e));
-            return;
         }
     }
 

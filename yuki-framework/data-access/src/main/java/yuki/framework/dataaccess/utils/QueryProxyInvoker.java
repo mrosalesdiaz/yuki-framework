@@ -1,13 +1,12 @@
 package yuki.framework.dataaccess.utils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,8 +18,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import com.google.common.io.ByteStreams;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -28,21 +25,22 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Tuple;
 import yuki.framework.dataaccess.Db;
+import yuki.framework.dataaccess.annotations.Parameter;
 
-public class QueryProxyInvocator implements InvocationHandler {
+public class QueryProxyInvoker implements InvocationHandler {
 
     private final static Pattern matchNamedParameters = Pattern.compile("\\b(\\w+)\\W*$");
 
     @Inject
     private Db db;
 
-    private String parameterOrder[];
+    private String[] parameterOrder;
 
     private Map<String, Object> parameters;
 
     private String query = " select '' as result ";
 
-    public void configure(final String query, final Class<?> returnType, final Map<String, Object> parameters) {
+    public void configure(final String query, final Map<String, Object> parameters) {
         this.query = query;
         final String[] parts = query.split(":=");
         this.parameterOrder = Stream.of(parts)
@@ -54,7 +52,7 @@ public class QueryProxyInvocator implements InvocationHandler {
         this.parameters.putAll(parameters);
     }
 
-    private Future<JsonArray> executeQuery() throws SQLException {
+    private Future<JsonArray> executeQuery() {
         final Promise<JsonArray> promise = Promise.promise();
         final Tuple parameters = Tuple.tuple(Stream.of(this.parameterOrder)
                 .map(this.parameters::get)
@@ -102,7 +100,7 @@ public class QueryProxyInvocator implements InvocationHandler {
     }
 
     private String getLastWord(final String line) {
-        final Matcher matcher = QueryProxyInvocator.matchNamedParameters.matcher(line);
+        final Matcher matcher = QueryProxyInvoker.matchNamedParameters.matcher(line);
         if (matcher.find()) {
             return matcher.group(1);
         }
@@ -111,7 +109,7 @@ public class QueryProxyInvocator implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) {
         final String methodName = method.getName();
 
         if (methodName.equals("execute")) {
@@ -119,7 +117,7 @@ public class QueryProxyInvocator implements InvocationHandler {
         }
 
         if (methodName.startsWith("set")) {
-            this.setParameter(methodName.substring(3), args[0]);
+            this.setParameter(methodName.substring(3), args[0], method.getAnnotation(Parameter.class));
         }
 
         return proxy;
@@ -147,30 +145,46 @@ public class QueryProxyInvocator implements InvocationHandler {
 
     }
 
-    private void setParameter(final String parameterName, final Object parameterValue) {
+    private void setParameter(final String parameterName, final Object parameterValue, Parameter parameterAnnotation) {
         if (parameterValue == null) {
             return;
         }
 
-        if (parameterValue instanceof InputStream) {
-            try {
-                this.parameters
-                        .put(parameterName, Buffer.buffer(ByteStreams.toByteArray((InputStream) parameterValue)));
-            } catch (final IOException e) {
-                throw new ParameterValueException(
-                        String.format("Error setting the parameter value for: %s", parameterName), e);
-            }
+        assert parameterAnnotation == null : "Parameter must have annotation to define database type";
 
-            return;
+        switch (parameterAnnotation.value()) {
+            case BOOLEAN:
+                this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Boolean) parameterValue));
+                break;
+            case NUMERIC:
+                this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Double) parameterValue));
+                break;
+            case BYTEA:
+                this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (InputStream) parameterValue));
+                break;
+            case DATE:
+            case TIMESTAMP_WITHOUT_TIME_ZONE:
+            case TIME:
+                if (parameterValue instanceof Instant) {
+                    this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Instant) parameterValue));
+                } else if (parameterValue instanceof LocalDate) {
+                    this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (LocalDate) parameterValue));
+                } else if (parameterValue instanceof LocalDateTime) {
+                    this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (LocalDateTime) parameterValue));
+                } else if (parameterValue instanceof LocalTime) {
+                    this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (LocalTime) parameterValue));
+                } else {
+                    throw new RuntimeException(String.format("Unsupported parameter type: %s", parameterValue.getClass()));
+                }
+
+                break;
+            case INTEGER:
+                this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Integer) parameterValue));
+                break;
+            case VARCHAR:
+                this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (String) parameterValue));
+                break;
         }
-
-        if (parameterValue instanceof Instant) {
-            this.parameters.put(parameterName, ((Instant) parameterValue).atOffset(ZoneOffset.ofHours(0))
-                    .toLocalDateTime());
-            return;
-        }
-
-        this.parameters.put(parameterName, parameterValue);
     }
 
 }

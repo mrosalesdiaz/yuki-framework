@@ -15,27 +15,3 @@ dependencies {
     compile project(':data-schema')
     compile group: 'io.vertx', name: 'vertx-config', version: '3.9.4'
 }
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-
-
-publishing {
-	publications {		
-        dataaccess(MavenPublication) {
-        	groupId = 'org.yuki'
-            artifactId = 'test-helper'
-            version = '1.0'
-            
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url = "file://Volumes/sdcard/yuki/local_publish"
-        }
-    }
-}

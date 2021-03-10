@@ -1,0 +1,38 @@
+ext.yuki = [
+        framework:[
+                version: "1.0",
+                groupId:"org.yuki"
+        ],
+        localrepo:'file://Volumes/sdcard/yuki/local_publish'
+]
+
+//if (project.name != "gradle-plugin") {
+
+apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+
+
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        endpoints(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = "${yuki.localrepo}"
+        }
+    }
+}
+
+//}

@@ -12,8 +12,8 @@ rootProject.name = 'yuki-framework'
 //include ':development-api'
 //project(':development-api').projectDir = new File(settingsDir, './development-api')
 
-include ':http-endpoints-service'
-project(':http-endpoints-service').projectDir = new File(settingsDir, './http-endpoints-service')
+include ':http-endpoints'
+project(':http-endpoints').projectDir = new File(settingsDir, './http-endpoints')
 
 include ':data-access'
 project(':data-access').projectDir = new File(settingsDir, './data-access')

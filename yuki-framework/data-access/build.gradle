@@ -8,58 +8,16 @@ repositories {
 }
 
 dependencies {
-	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
-	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
-	compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
-	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
-	
-	
-	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
-	//testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testCompile("org.assertj:assertj-core:3.11.1")
-    testCompile("io.vertx:vertx-junit5:3.9.4")
+
+    compile (deps.di)
+    compile (deps.db)
+
     testCompile project(':test-helper')
     testCompile project(':data-schema')
-    testCompile group: 'io.vertx', name: 'vertx-config', version: '3.9.4'
+
+    testCompile (deps.vertxtest)
+
+    testImplementation(platform(eclipse.test.junitbom))
+	testImplementation(eclipse.test.junitjupiter)
     
-    testImplementation(platform('org.junit:junit-bom:5.7.1'))
-	testImplementation('org.junit.jupiter:junit-jupiter')
-    
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-
-
-publishing {
-	publications {		
-        dataaccess(MavenPublication) {
-        	groupId = 'org.yuki'
-            artifactId = 'data-access'
-            version = '1.0'
-            
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url = "file://Volumes/sdcard/yuki/local_publish"
-        }
-    }
-}
-
-test {
-// TODO: not used right now
-	useJUnitPlatform()
-
-    maxHeapSize = '1G'
-    testLogging {
-        //events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
-        events "PASSED", "FAILED"
-    }
 }

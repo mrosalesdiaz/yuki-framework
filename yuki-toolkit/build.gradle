@@ -8,3 +8,8 @@ repositories {
 dependencies {
 }
 
+subprojects {
+    apply from: "${rootDir}/gradle/libraries.gradle"
+    apply from: "${rootDir}/gradle/unittest.gradle"
+    apply from: "${rootDir}/gradle/publishing.gradle"
+}

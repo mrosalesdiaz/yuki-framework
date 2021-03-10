@@ -1,0 +1,45 @@
+
+ext.google = [
+        guice : "com.google.inject:guice:4.2.3",
+        guava : "com.google.guava:guava:11.0.2"
+]
+
+ext.postgresql = [
+        database : [
+                vertxclient:"io.vertx:vertx-pg-client:3.9.4",
+                hikaricp:"com.zaxxer:HikariCP:3.4.5"
+        ]
+]
+
+ext.commons = [
+        slf4j : "org.slf4j:slf4j-simple:1.7.30"
+]
+
+ext.eclipse = [
+        test : [
+                vertxclient:"org.assertj:assertj-core:3.11.1",
+                hikaricp:"io.vertx:vertx-junit5:3.9.4",
+                vertxconf:"io.vertx:vertx-config:3.9.4",
+                junitbom:"org.junit:junit-bom:5.7.1",
+                junitjupiter:"org.junit.jupiter:junit-jupiter"
+        ]
+]
+
+ext.deps = [
+        di :[
+                ext.google.guice,
+                ext.google.guava
+        ],
+        db:[
+                ext.postgresql.database.vertxclient,
+                ext.postgresql.database.hikaricp
+        ],
+        vertxtest:[
+                ext.eclipse.test.vertxclient,
+                ext.eclipse.test.hikaricp,
+                ext.eclipse.test.vertxconf,
+                ext.commons.slf4j
+        ]
+
+]
+

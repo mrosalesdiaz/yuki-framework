@@ -3,14 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-gradlePlugin {
-    plugins {
-        simplePlugin {
-            id = 'yuki.gen-endpoints'
-            implementationClass = 'yuki.plugin.YukiGenPlugin'
-        }
-    }
-}
+
 
 repositories {
     jcenter()
@@ -31,14 +24,27 @@ dependencies {
     implementation group: 'org.ow2.asm', name: 'asm', version: '7.0'
 }
 
-group = 'org.samples'
-version = '1.0'
 
-publishing {
-    repositories {
-        maven {
-            url = "file://Volumes/sdcard/yuki/local_publish"
+gradlePlugin {
+
+    plugins {
+        simplePlugin {
+            id = 'yuki-plugin'
+            version ='1.0'
+            implementationClass = 'yuki.plugin.YukiGenPlugin'
         }
     }
 }
+/*
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+publishing {
+    repositories {
+        maven {
+            url = "${yuki.localrepo}"
+        }
+    }
+}*/

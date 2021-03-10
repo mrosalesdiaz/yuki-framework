@@ -28,19 +28,3 @@ flyway {
     password = 'moresecure'
     schemas = ['lobby']
 }
-
-publishing {
-	publications {
-        dataschema(MavenPublication) {
-        	groupId = 'org.yuki'
-            artifactId = 'data-schema'
-            version = '1.0'
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url = "file://Volumes/sdcard/yuki/local_publish"
-        }
-    }
-}

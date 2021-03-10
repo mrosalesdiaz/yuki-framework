@@ -11,7 +11,7 @@ import io.vertx.sqlclient.PoolOptions;
 /**
  * Singleton class to access database connection.
  *
- * It depends on {@link DbConfigurator} in order to configure url connection.
+ * It depends on {@link yuki.framework.dataaccess.DbConfigurator} in order to configure url connection.
  *
  * @author mrosalesdiaz
  *

@@ -16,23 +16,6 @@ dependencies {
 }
 
 
-publishing {
-	publications {
-        endpoints(MavenPublication) {
-        	groupId = 'org.yuki'
-            artifactId = 'endpoints'
-            version = '1.0'
-            
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url = "file://Volumes/sdcard/yuki/local_publish"
-        }
-    }
-}
-
 vertx {
   mainVerticle = 'yuki.framework.rest.RestServerVerticle'
   debugSuspend = true

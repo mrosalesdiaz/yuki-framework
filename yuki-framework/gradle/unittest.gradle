@@ -1,0 +1,12 @@
+subprojects {
+    test {
+// TODO: not used right now
+        useJUnitPlatform()
+
+        maxHeapSize = '1G'
+        testLogging {
+            //events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
+            events "PASSED", "FAILED"
+        }
+    }
+}

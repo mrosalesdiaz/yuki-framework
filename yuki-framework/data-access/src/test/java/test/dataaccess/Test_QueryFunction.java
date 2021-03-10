@@ -1,4 +1,4 @@
-package test;
+package test.dataaccess;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -23,33 +23,41 @@ import com.google.inject.Injector;
 
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import test.common.TestHelper;
+import test.dataaccess.common.TestHelper;
 import yuki.framework.dataaccess.DbConfigurator;
+import yuki.framework.dataaccess.annotations.Parameter;
+import yuki.framework.dataaccess.annotations.ParameterType;
 import yuki.framework.dataaccess.annotations.QueryDefinitionMetadata;
 import yuki.framework.dataaccess.utils.DatabaseExecutionException;
 import yuki.framework.dataaccess.utils.QueryDefinition;
 import yuki.framework.dataaccess.utils.QueryExecutor;
 
-@QueryDefinitionMetadata(sql = " SELECT * FROM fn_echo_function( v_string:= $1, v_integer:=$2 ,v_double:=$3 ,v_boolean:=$4 ,v_instant:=$5 ,v_timestamp:=$6 ,v_inputstream:=$7 )", returnType = JsonArray.class)
+@QueryDefinitionMetadata(sql = " SELECT * FROM fn_echo_function( v_string:= $1, v_integer:=$2 ,v_double:=$3 ,v_boolean:=$4 ,v_instant:=$5 ,v_timestamp:=$6 ,v_inputstream:=$7 )")
 interface FnEcho extends QueryDefinition {
 
+    @Parameter(ParameterType.BOOLEAN)
     void setV_boolean(Boolean boolean1);
 
+    @Parameter(ParameterType.NUMERIC)
     void setV_double(Double double1);
 
+    @Parameter(ParameterType.BYTEA)
     void setV_inputstream(InputStream name);
 
+    @Parameter(ParameterType.DATE)
     void setV_instant(Instant instant);
 
+    @Parameter(ParameterType.INTEGER)
     void setV_integer(Integer integer);
 
+    @Parameter(ParameterType.VARCHAR)
     void setV_string(String string);
 
+    @Parameter(ParameterType.TIMESTAMP_WITHOUT_TIME_ZONE)
     void setV_timestamp(Instant instant);
 
 }

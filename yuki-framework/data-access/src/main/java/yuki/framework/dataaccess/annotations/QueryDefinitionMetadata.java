@@ -19,13 +19,7 @@ public @interface QueryDefinitionMetadata {
 
 	/**
 	 * @return executing query example: " SELECT * FROM fn_create_lobby( name:= $1 )
-	 *         "
 	 */
 	String sql();
-
-	/**
-	 * @return return type, only supported: {@link JsonArray}
-	 */
-	Class<?> returnType();
 
 }
