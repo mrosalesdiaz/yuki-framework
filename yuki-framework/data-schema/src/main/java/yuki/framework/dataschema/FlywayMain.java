@@ -34,7 +34,7 @@ public class FlywayMain {
             final String schema, final boolean cleanOnValidationError) {
         final Flyway flyway = Flyway.configure()
                 .dataSource(url, user, password)
-                .schemas(schema)
+                .schemas(schema.split(","))
                 .cleanOnValidationError(cleanOnValidationError)
                 .load();
 
