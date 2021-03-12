@@ -4,6 +4,14 @@ ext.google = [
         guava : "com.google.guava:guava:11.0.2"
 ]
 
+ext.javaparser=[
+        core: "com.github.javaparser:javaparser-core:3.16.2"
+]
+
+ext.openfeign = [
+        core:"io.github.openfeign:feign-core:11.0"
+]
+
 ext.postgresql = [
         database : [
                 vertxclient:"io.vertx:vertx-pg-client:3.9.4",
@@ -12,10 +20,20 @@ ext.postgresql = [
 ]
 
 ext.commons = [
-        slf4j : "org.slf4j:slf4j-simple:1.7.30"
+]
+
+
+ext.commontest = [
+        junitjupiter: "org.junit.jupiter:junit-jupiter",
+        junitbom    : "org.junit:junit-bom:5.7.1",
+        assertj     : "org.assertj:assertj-core:3.18.1",
+        platform    : "org.junit.platform:junit-platform-commons:1.7.0"
 ]
 
 ext.eclipse = [
+        vertx:[
+                core:"io.vertx:vertx-core:${yuki.vertx.version}"
+        ],
         test : [
                 vertxclient:"org.assertj:assertj-core:3.11.1",
                 hikaricp:"io.vertx:vertx-junit5:3.9.4",
@@ -26,20 +44,26 @@ ext.eclipse = [
 ]
 
 ext.deps = [
-        di :[
+        plugin :[
                 ext.google.guice,
-                ext.google.guava
+                ext.google.guava,
+                ext.javaparser.core,
+                ext.openfeign.core,
+                ext.eclipse.vertx.core
         ],
+
         db:[
                 ext.postgresql.database.vertxclient,
                 ext.postgresql.database.hikaricp
         ],
-        vertxtest:[
-                ext.eclipse.test.vertxclient,
-                ext.eclipse.test.hikaricp,
-                ext.eclipse.test.vertxconf,
-                ext.commons.slf4j
-        ]
 
+        test: [
+                ext.commontest.junitjupiter,
+                ext.commontest.junitbom,
+                ext.commontest.assertj,
+                ext.commontest.platform
+        ]
 ]
+
+
 

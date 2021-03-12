@@ -1,6 +1,7 @@
 package yuki.framework.dataaccess.utils;
 
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -150,7 +151,7 @@ public class QueryProxyInvoker implements InvocationHandler {
             return;
         }
 
-        assert parameterAnnotation == null : "Parameter must have annotation to define database type";
+        assert parameterAnnotation != null : "Parameter must have annotation to define database type";
 
         switch (parameterAnnotation.value()) {
             case BOOLEAN:
