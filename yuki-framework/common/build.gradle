@@ -1,0 +1,17 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+
+    implementation (eclipse.vertx.core)
+
+    testImplementation(deps.test)
+    testImplementation(platform(eclipse.test.junitbom))
+    testImplementation(eclipse.test.junitjupiter)
+}

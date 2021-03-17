@@ -15,7 +15,18 @@ ext.commons = [
         slf4j : "org.slf4j:slf4j-simple:1.7.30"
 ]
 
+
+ext.commontest = [
+        junitjupiter: "org.junit.jupiter:junit-jupiter",
+        junitbom    : "org.junit:junit-bom:5.7.1",
+        assertj     : "org.assertj:assertj-core:3.18.1",
+        platform    : "org.junit.platform:junit-platform-commons:1.7.0"
+]
+
 ext.eclipse = [
+        vertx :[
+                core:"io.vertx:vertx-core:3.9.4"
+        ],
         test : [
                 vertxclient:"org.assertj:assertj-core:3.11.1",
                 hikaricp:"io.vertx:vertx-junit5:3.9.4",
@@ -39,6 +50,10 @@ ext.deps = [
                 ext.eclipse.test.hikaricp,
                 ext.eclipse.test.vertxconf,
                 ext.commons.slf4j
+        ],
+        test:[
+                ext.commontest.assertj,
+                ext.google.guava
         ]
 
 ]
