@@ -12,6 +12,7 @@ dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
 	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
 	compile group: 'io.vertx', name: 'vertx-core', version: '3.9.4'
+	compile group: 'io.vertx', name: 'vertx-junit5', version: '3.9.4'
     compile project(':data-schema')
     compile group: 'io.vertx', name: 'vertx-config', version: '3.9.4'
 }

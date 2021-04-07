@@ -35,6 +35,7 @@ public class FlywayMain {
         final Flyway flyway = Flyway.configure()
                 .dataSource(url, user, password)
                 .schemas(schema.split(","))
+                .outOfOrder(true)
                 .cleanOnValidationError(cleanOnValidationError)
                 .load();
 

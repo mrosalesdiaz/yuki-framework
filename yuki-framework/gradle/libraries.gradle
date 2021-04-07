@@ -25,7 +25,9 @@ ext.commontest = [
 
 ext.eclipse = [
         vertx :[
-                core:"io.vertx:vertx-core:3.9.4"
+                core:"io.vertx:vertx-core:3.9.4",
+                web :"io.vertx:vertx-web:3.9.4",
+                webclient: "io.vertx:vertx-web-client:3.9.4"
         ],
         test : [
                 vertxclient:"org.assertj:assertj-core:3.11.1",
@@ -40,6 +42,10 @@ ext.deps = [
         di :[
                 ext.google.guice,
                 ext.google.guava
+        ],
+        web : [
+                ext.eclipse.vertx.web,
+                ext.eclipse.vertx.webclient
         ],
         db:[
                 ext.postgresql.database.vertxclient,

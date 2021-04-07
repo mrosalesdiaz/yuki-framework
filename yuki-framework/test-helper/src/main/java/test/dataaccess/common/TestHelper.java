@@ -12,10 +12,15 @@ import org.apache.commons.cli.ParseException;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxTestContext;
 import yuki.framework.dataschema.FlywayMain;
+
 
 public class TestHelper {
 
@@ -84,4 +89,28 @@ public class TestHelper {
         }
     }
 
+    public static void catchException(VertxTestContext.ExecutionBlock executionBlock, Handler<Throwable> throwableHandler) {
+        try {
+            executionBlock.apply();
+        } catch (Throwable e) {
+            throwableHandler.handle(e);
+        }
+    }
+
+    public static Future<Void> deployVerticle(Vertx vertx, String vertxClass, DeploymentOptions deploymentOptions) {
+        Promise<Void> promise = Promise.promise();
+
+        vertx.deployVerticle(
+                vertxClass,
+                deploymentOptions, r -> {
+                    if (r.failed()) {
+                        promise.fail(r.cause());
+                        r.cause().printStackTrace();
+                        return;
+                    }
+                    promise.complete();
+                });
+
+        return promise.future();
+    }
 }
