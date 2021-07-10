@@ -1,290 +1,472 @@
 package test.dataaccess;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-
-import org.apache.commons.cli.ParseException;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import org.apache.commons.cli.ParseException;
+import org.assertj.core.api.Assertions;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import test.dataaccess.common.TestHelper;
-import yuki.framework.dataaccess.DbConfigurator;
 import yuki.framework.dataaccess.annotations.Parameter;
 import yuki.framework.dataaccess.annotations.ParameterType;
 import yuki.framework.dataaccess.annotations.QueryDefinitionMetadata;
-import yuki.framework.dataaccess.utils.DatabaseExecutionException;
+import yuki.framework.dataaccess.dto.DbConfig;
 import yuki.framework.dataaccess.utils.QueryDefinition;
 import yuki.framework.dataaccess.utils.QueryExecutor;
 
 @QueryDefinitionMetadata(sql = " SELECT * FROM fn_echo_function( v_string:= $1, v_integer:=$2 ,v_double:=$3 ,v_boolean:=$4 ,v_instant:=$5 ,v_timestamp:=$6 ,v_inputstream:=$7 )")
 interface FnEcho extends QueryDefinition {
 
-    @Parameter(ParameterType.BOOLEAN)
-    void setV_boolean(Boolean boolean1);
+  @Parameter(ParameterType.BOOLEAN)
+  void setV_boolean(Boolean boolean1);
 
-    @Parameter(ParameterType.NUMERIC)
-    void setV_double(Double double1);
+  @Parameter(ParameterType.DOUBLE)
+  void setV_double(Double double1);
 
-    @Parameter(ParameterType.BYTEA)
-    void setV_inputstream(InputStream name);
+  @Parameter(ParameterType.BYTEA)
+  void setV_inputstream(InputStream name);
 
-    @Parameter(ParameterType.DATE)
-    void setV_instant(Instant instant);
+  @Parameter(ParameterType.DATE)
+  void setV_instant(Instant instant);
 
-    @Parameter(ParameterType.INTEGER)
-    void setV_integer(Integer integer);
+  @Parameter(ParameterType.INTEGER)
+  void setV_integer(Integer integer);
 
-    @Parameter(ParameterType.VARCHAR)
-    void setV_string(String string);
+  @Parameter(ParameterType.STRING)
+  void setV_string(String string);
 
-    @Parameter(ParameterType.TIMESTAMP_WITHOUT_TIME_ZONE)
-    void setV_timestamp(Instant instant);
+  @Parameter(ParameterType.DATETIME)
+  void setV_timestamp(Instant instant);
 
 }
 
 @ExtendWith(VertxExtension.class)
 public class Test_QueryFunction {
-    @AfterAll
-    static void cleanUp() throws ParseException, InterruptedException {
-        TestHelper.dbClean("./config.json");
-    }
 
-    @BeforeAll
-    static void init() throws ParseException, InterruptedException {
-        TestHelper.dbCleanAndMigrate("./config.json");
-    }
+  private final static String JSON_CONFIG_FILE = "./test-config.json";
 
-    @Inject
-    private DbConfigurator dbConfigurator;
+  @AfterAll
+  static void afterAll() throws ParseException, InterruptedException {
+    JsonObject config = TestHelper.getConfig(JSON_CONFIG_FILE);
 
-    @Inject
-    private QueryExecutor queryExecutor;
+    URI jdbcUri = URI.create(
+        String.format("dummy://%s", config.getString("jdbcUrl").split("\\:\\/\\/")[1]));
+    String dbUser = config.getString("dbUser");
+    String dbPassword = config.getString("dbPassword");
 
-    @BeforeEach
-    void initialize() throws Throwable {
-        final Injector injector = Guice.createInjector(new AbstractModule() {
+    Flyway flyway = Flyway.configure()
+        .dataSource(String.format("jdbc:postgresql://%s:%s%s", jdbcUri.getHost(),
+            Math.max(jdbcUri.getPort(), 5432),
+            jdbcUri.getPath()), dbUser, dbPassword)
+        .schemas("unittest")
+        .outOfOrder(true)
+        .cleanOnValidationError(false)
+        .load();
 
-        });
-        injector.injectMembers(this);
+    flyway.clean();
+  }
 
-        final CountDownLatch latch = new CountDownLatch(1);
+  @BeforeEach
+  void beforeEach() throws Throwable {
+    JsonObject config = TestHelper.getConfig(JSON_CONFIG_FILE);
 
-        final Promise<JsonObject> config = Promise.promise();
-        final Vertx vertx = Vertx.vertx();
-        TestHelper.loadConfiguration(vertx, "./config.json").getConfig(config::handle);
+    URI jdbcUri = URI.create(
+        String.format("dummy://%s", config.getString("jdbcUrl").split("\\:\\/\\/")[1]));
+    String dbUser = config.getString("dbUser");
+    String dbPassword = config.getString("dbPassword");
 
-        config.future().onComplete(s -> {
-            s.result().stream().forEach(e -> vertx.getOrCreateContext().config().put(e.getKey(), e.getValue()));
-            this.dbConfigurator.init(vertx, e -> {
-                latch.countDown();
-            });
-        });
+    Flyway flyway = Flyway.configure()
+        .dataSource(String.format("jdbc:postgresql://%s:%s%s", jdbcUri.getHost(),
+            Math.max(jdbcUri.getPort(), 5432),
+            jdbcUri.getPath()), dbUser, dbPassword)
+        .schemas("unittest")
+        .outOfOrder(true)
+        .cleanOnValidationError(false)
+        .load();
 
-        latch.await(60, TimeUnit.SECONDS);
-    }
+    flyway.clean();
+    flyway.migrate();
+  }
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_boolean_When_boolean_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
+  void Should_return_boolean_When_boolean_parameter_is_passed(Vertx vertx,
+      final VertxTestContext vertxTestContext)
+      throws Throwable {
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-        fnEcho.setV_boolean(false);
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-                    Assertions.assertThat(jsonObject.getBoolean("c_boolean"))
-                            .isEqualTo(false);
+      fnEcho.setV_boolean(false);
 
-                    vertxTestContext.completeNow();
+      return fnEcho.execute();
+    };
 
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+    Function<JsonArray, Future<Void>> verifyResult = result -> vertx.executeBlocking(p -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+        Assertions.assertThat(jsonObject.getBoolean("c_boolean"))
+            .isEqualTo(false);
+      });
+      p.complete();
+    });
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_double_When_double_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_double_When_double_parameter_is_passed(Vertx vertx,
+      VertxTestContext vertxTestContext)
+      throws Throwable {
 
-        fnEcho.setV_double(99.99);
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-                    Assertions.assertThat(jsonObject.getDouble("c_double"))
-                            .isEqualTo(99.99);
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-                    vertxTestContext.completeNow();
+      fnEcho.setV_double(99.99);
 
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+      return fnEcho.execute();
+    };
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_inputstream_When_inputstream_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+        Assertions.assertThat(jsonObject.getDouble("c_double"))
+            .isEqualTo(99.99);
+      });
+      return Future.succeededFuture();
+    };
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-        final String data = "test test";
-        fnEcho.setV_inputstream(new ByteArrayInputStream(data.getBytes()));
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_inputstream_When_inputstream_parameter_is_passed(
+      Vertx vertx, VertxTestContext vertxTestContext)
+      throws Throwable {
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+    final String data = "test test";
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-                    Assertions.assertThat(new String(jsonObject.getBinary("c_inputstream")))
-                            .isEqualTo(data);
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-                    vertxTestContext.completeNow();
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+      fnEcho.setV_inputstream(new ByteArrayInputStream(data.getBytes()));
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_instant_date_When_instant_with_time_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+      return fnEcho.execute();
+    };
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+        Assertions.assertThat(new String(jsonObject.getBinary("c_inputstream")))
+            .isEqualTo(data);
+      });
+      return Future.succeededFuture();
+    };
 
-        final Instant now = Instant.now();
-        fnEcho.setV_instant(now);
-        final Instant now2 = now.truncatedTo(ChronoUnit.DAYS);
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_instant_date_When_instant_with_time_parameter_is_passed(
+      Vertx vertx, VertxTestContext vertxTestContext)
+      throws Throwable {
 
-                    Assertions.assertThat(jsonObject.getInstant("c_instant"))
-                            .isEqualTo(now2);
+    final Instant now = Instant.now();
+    final Instant now2 = now.truncatedTo(ChronoUnit.DAYS);
 
-                    vertxTestContext.completeNow();
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-                }))
-                .onFailure(e -> vertxTestContext.verify(() -> {
-                    Assertions.assertThat(e.getClass())
-                            .isEqualTo(DatabaseExecutionException.class);
-                    vertxTestContext.completeNow();
-                }));
-    }
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-    // @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_instant_When_instant_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+      fnEcho.setV_instant(now);
 
-        final Instant now = Instant.now()
-                .truncatedTo(ChronoUnit.DAYS);
-        fnEcho.setV_instant(now);
+      return fnEcho.execute();
+    };
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+        Assertions.assertThat(jsonObject.getInstant("c_instant"))
+            .isEqualTo(now2);
+      });
+      return Future.succeededFuture();
+    };
 
-                    Assertions.assertThat(jsonObject.getInstant("c_instant"))
-                            .isEqualTo(now);
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-                    vertxTestContext.completeNow();
+  // @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_instant_When_instant_parameter_is_passed(
+      Vertx vertx, VertxTestContext vertxTestContext)
+      throws Throwable {
 
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+    final Instant now = Instant.now()
+        .truncatedTo(ChronoUnit.DAYS);
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_instant_with_time_When_instant_with_time_parameter_is_passed(
-            final VertxTestContext vertxTestContext) throws Throwable {
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-        final Instant now = Instant.now();
-        fnEcho.setV_timestamp(now);
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+      return fnEcho.execute();
+    };
 
-                    Assertions.assertThat(jsonObject.getInstant("c_timestamp"))
-                            .isEqualTo(now);
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
 
-                    vertxTestContext.completeNow();
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+        Assertions.assertThat(jsonObject.getInstant("c_instant"))
+            .isEqualTo(now);
+      });
+      return Future.succeededFuture();
+    };
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void Should_return_integer_When_integer_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_instant_with_time_When_instant_with_time_parameter_is_passed(
+      Vertx vertx, VertxTestContext vertxTestContext) throws Throwable {
 
-        fnEcho.setV_integer(9);
+    final Instant now = Instant.now()
+        .truncatedTo(ChronoUnit.DAYS);
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
 
-                    Assertions.assertThat(jsonObject.getDouble("c_integer"))
-                            .isEqualTo(9);
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
 
-                    vertxTestContext.completeNow();
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
 
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+      fnEcho.setV_timestamp(now);
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
-    void Should_return_string_When_string_parameter_is_passed(final VertxTestContext vertxTestContext)
-            throws Throwable {
+      return fnEcho.execute();
+    };
 
-        final FnEcho fnEcho = this.queryExecutor.create(FnEcho.class);
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
 
-        fnEcho.setV_string("Hello");
+        Assertions.assertThat(jsonObject.getInstant("c_timestamp"))
+            .isEqualTo(now);
+      });
+      return Future.succeededFuture();
+    };
 
-        fnEcho.execute()
-                .onSuccess(h -> vertxTestContext.verify(() -> {
-                    final JsonObject jsonObject = h.getJsonObject(0);
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
 
-                    Assertions.assertThat(jsonObject.getString("c_string"))
-                            .isEqualTo("Hello");
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  void Should_return_integer_When_integer_parameter_is_passed(
+      Vertx vertx, VertxTestContext vertxTestContext)
+      throws Throwable {
 
-                    vertxTestContext.completeNow();
-                }))
-                .onFailure(vertxTestContext::failNow);
-    }
+    final Instant now = Instant.now()
+        .truncatedTo(ChronoUnit.DAYS);
+
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
+
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
+
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
+
+      fnEcho.setV_integer(9);
+
+      return fnEcho.execute();
+    };
+
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+
+        Assertions.assertThat(jsonObject.getDouble("c_integer"))
+            .isEqualTo(9);
+      });
+      return Future.succeededFuture();
+    };
+
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+  }
+
+  @Test
+  @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
+  void Should_return_string_When_string_parameter_is_passed(Vertx vertx,
+      VertxTestContext vertxTestContext)
+      throws Throwable {
+
+    final Instant now = Instant.now()
+        .truncatedTo(ChronoUnit.DAYS);
+
+    Function<JsonObject, Future<Injector>> createInjector = config -> {
+      vertx.getOrCreateContext().config().mergeIn(config);
+
+      return Future.succeededFuture(Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Vertx.class).toInstance(vertx);
+          bind(DbConfig.class).toInstance(DbConfig.from(config));
+        }
+      }));
+    };
+
+    Function<Injector, Future<JsonArray>> executeFunction = injector -> {
+      final FnEcho fnEcho = injector.getInstance(QueryExecutor.class).create(FnEcho.class);
+
+      fnEcho.setV_string("Hello");
+
+      return fnEcho.execute();
+    };
+
+    Function<JsonArray, Future<Void>> verifyResult = result -> {
+      vertxTestContext.verify(() -> {
+        final JsonObject jsonObject = result.getJsonObject(0);
+
+        Assertions.assertThat(jsonObject.getString("c_string"))
+            .isEqualTo("Hello");
+
+      });
+      return Future.succeededFuture();
+    };
+
+    TestHelper.getConfig(vertx, JSON_CONFIG_FILE)
+        .compose(createInjector)
+        .compose(executeFunction)
+        .compose(verifyResult)
+        .onFailure(vertxTestContext::failNow)
+        .onSuccess(r -> vertxTestContext.completeNow());
+
+  }
 
 }

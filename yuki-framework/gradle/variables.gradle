@@ -1,0 +1,17 @@
+ext.yuki = [
+        version: '1.0.0',
+        prefix : 'yuki',
+
+        vertx  : [
+                version: '4.0.3'
+        ],
+
+        framework:[
+                groupId:'org.yuki' ,
+                version:'1.0.0'
+        ],
+
+        localrepo: 'file://Volumes/sdcard/yuki/local_publish'
+]
+
+

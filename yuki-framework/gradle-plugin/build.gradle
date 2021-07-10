@@ -1,0 +1,53 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+dependencies {
+    compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
+    compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
+    compile project(':data-function')
+    compile project(':data-schema')
+
+    //implementation "com.github.javaparser:javaparser-core:3.16.2"
+	//implementation "io.github.openfeign:feign-core:11.0"
+	//implementation "com.google.inject:guice:4.2.3"
+	//implementation "com.google.guava:guava:11.0.2"
+    //implementation group: 'org.ow2.asm', name: 'asm', version: '7.0'
+}
+
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'yuki-plugin'
+            version ='1.0'
+            implementationClass = 'yuki.gradleplugin.YukiGenPlugin'
+        }
+    }
+}
+print yuki.framework.groupId+":"+project.name+":"+yuki.framework.version
+publishing {
+    publications {
+        "gradle-plugin"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
+}
+/*
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+publishing {
+    repositories {
+        maven {
+            url = "${yuki.localrepo}"
+        }
+    }
+}*/

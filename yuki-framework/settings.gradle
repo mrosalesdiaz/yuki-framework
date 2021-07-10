@@ -30,6 +30,12 @@ project(':common').projectDir = new File(settingsDir, './common')
 include ':verticle-helper'
 project(':verticle-helper').projectDir = new File(settingsDir, './verticle-helper')
 
+include ':data-function'
+project(':data-function').projectDir = new File(settingsDir, './data-function')
+
+//include ':gradle-plugin'
+//project(':gradle-plugin').projectDir = new File(settingsDir, './gradle-plugin')
+
 
 /*
 include ':shootory-annotations'

@@ -35,7 +35,7 @@ public class ProcessDbParameter {
                 return LocalTime.from(val.atOffset(ZoneOffset.UTC));
             case DATE:
                 return LocalDate.from(val.atOffset(ZoneOffset.UTC));
-            case TIMESTAMP_WITHOUT_TIME_ZONE:
+            case DATETIME:
                 return LocalDateTime.from(val.atOffset(ZoneOffset.UTC));
             default:
                 throw new ClassCastException(String.format("yuki: Wrong type: %s", parameterDef.value()));
@@ -65,9 +65,7 @@ public class ProcessDbParameter {
         }
 
         switch (parameterDef.value()) {
-            case TEXT:
-                return  val;
-            case VARCHAR:
+            case STRING:
                 return val.substring(0, Math.min(parameterDef.length(), val.length() - 1));
             default:
                 throw new ClassCastException(String.format("Wrong type: %s", parameterDef.value()));

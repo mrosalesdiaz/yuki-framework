@@ -1,19 +1,37 @@
 package yuki.framework.dataaccess.annotations;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 public enum ParameterType {
-    BOOLEAN("boolean"),
-    NUMERIC("numeric"),
-    BYTEA("bytea"),
-    DATE("date"),
-    INTEGER("integer"),
-    VARCHAR("varchar"),
-    TEXT("text"),
-    TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone"),
-    TIME("time");
+  STRING(String.class, "varchar","text","character varying"),
 
-    private final String dbType;
+  BOOLEAN(Boolean.class, "bool"),
 
-    ParameterType(String dbType) {
-        this.dbType = dbType;
-    }
+  INTEGER(Integer.class, "int"),
+  DOUBLE(Double.class, "double"),
+
+  BYTEA(Byte[].class, "bytea"),
+
+  DATE(LocalDate.class, "date"),
+  DATETIME(LocalDateTime.class, "timestamp"),
+  TIME(LocalTime.class, "time");
+
+  private final String[] dbType;
+  private final Class<?> javaType;
+
+  ParameterType(Class<?> javaType, String... dbType) {
+    this.dbType = dbType;
+    this.javaType = javaType;
+  }
+
+
+  public String[] dbType() {
+    return dbType;
+  }
+
+  public Class<?> javaType() {
+    return javaType;
+  }
 }

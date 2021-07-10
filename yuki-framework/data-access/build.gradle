@@ -1,23 +1,23 @@
-plugins {
- 	id 'java-library'
-    id 'maven-publish'
-}
-
-repositories {
-    jcenter()
-}
-
 dependencies {
+    implementation(deps.data_access)
+    implementation project(':common')
 
-    compile (deps.di)
-    compile (deps.db)
+    testImplementation(deps.common_test)
 
-    testCompile project(':test-helper')
-    testCompile project(':data-schema')
+    testImplementation project(':test-helper')
+    testImplementation project(':data-schema')
 
-    testCompile (deps.vertxtest)
+   testImplementation(platform(junit.bom))
+}
 
-    testImplementation(platform(eclipse.test.junitbom))
-	testImplementation(eclipse.test.junitjupiter)
-    
+publishing {
+    publications {
+        "data-access"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
 }

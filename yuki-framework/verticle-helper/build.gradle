@@ -1,23 +1,21 @@
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-}
-
-repositories {
-    jcenter()
-}
-
 dependencies {
 
-    implementation (eclipse.vertx.core)
-    implementation(deps.di)
-    implementation (deps.web)
+    implementation(deps.verticle_helper)
+    testImplementation(deps.common_test)
 
-
-
-    testImplementation(deps.test)
     testImplementation project(':common')
-    testImplementation(platform(eclipse.test.junitbom))
-    testImplementation(eclipse.test.junitjupiter)
-    testImplementation(deps.vertxtest)
+
+   testImplementation(platform(junit.bom))
+}
+
+publishing {
+    publications {
+        "verticle-helper"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
 }

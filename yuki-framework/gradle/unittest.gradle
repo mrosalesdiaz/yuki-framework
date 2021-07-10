@@ -1,4 +1,5 @@
-subprojects {
+
+apply plugin: 'java-library'
     test {
 // TODO: not used right now
         useJUnitPlatform()
@@ -8,5 +9,5 @@ subprojects {
             //events "PASSED", "SKIPPED", "FAILED", "STANDARD_OUT", "STANDARD_ERROR"
             events "PASSED", "FAILED"
         }
-    }
+
 }

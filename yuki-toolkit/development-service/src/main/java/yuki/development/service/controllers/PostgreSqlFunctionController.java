@@ -1,5 +1,6 @@
 package yuki.development.service.controllers;
 
+import com.google.common.base.Splitter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Comparator;
@@ -58,8 +59,10 @@ public class PostgreSqlFunctionController {
 							responseEntity = a.result()
 									.stream()
 									.map(JsonObject.class::cast)
-									.filter(o -> o.getString("schemaName", "")
-											.equalsIgnoreCase(schema))
+									.filter(o -> {
+										String currentSchema=o.getString("schemaName", "");
+												return currentSchema.equalsIgnoreCase(schema);
+									})
 									.map(this::postProcessClassName)
 									.map(this::postProcessParameterType)
 									.sorted(this.postSortingForSuffixNaming())
@@ -145,14 +148,12 @@ public class PostgreSqlFunctionController {
 			return jsonObject;
 		}
 
-		final JsonArray arrayOfParameterDefinitions = Stream
-				.of(jsonObject.getString(PostgreSqlFunctionController.COLUMN_PARAMETERS, "")
-						.split(","))
-				.map(String::trim)
-				.map(s -> s.split(" "))
-				.map(s -> new JsonObject().put("name", s[0].trim())
-						.put("type", s[1].trim()))
-				.collect(Collector.of(JsonArray::new, JsonArray::add, JsonArray::add));
+		final JsonArray arrayOfParameterDefinitions = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(jsonObject.getString(PostgreSqlFunctionController.COLUMN_PARAMETERS, ""))
+        .stream()
+        .map(String::trim)
+        .map(s -> s.split(" "))
+        .map(s -> new JsonObject().put("name", s[0].trim()).put("type", s[1].trim()))
+        .collect(Collector.of(JsonArray::new, JsonArray::add, JsonArray::add));
 
 		jsonObject.put(PostgreSqlFunctionController.COLUMN_PARAMETERS, arrayOfParameterDefinitions);
 

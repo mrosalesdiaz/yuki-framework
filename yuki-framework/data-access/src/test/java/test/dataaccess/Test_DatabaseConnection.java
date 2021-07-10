@@ -2,116 +2,137 @@ package test.dataaccess;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
-
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.concurrent.TimeUnit;
-
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Timeout;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
-import io.vertx.pgclient.PgException;
 import yuki.framework.dataaccess.Db;
-import yuki.framework.dataaccess.DbConfigurator;
+import yuki.framework.dataaccess.common.DbConfigException;
+import yuki.framework.dataaccess.dto.DbConfig;
 
 @ExtendWith(VertxExtension.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
 public class Test_DatabaseConnection {
 
-    @Inject
-    private Db db;
-    @Inject
-    private DbConfigurator dbConfigurator;
+  @Test
+  void Should_return_an_active_connection_When_it_is_well_configure(final Vertx vertx,
+      final VertxTestContext testContext) {
 
-    public static ConfigRetriever loadConfiguration(final Vertx vertx, final String value) {
-        final ConfigStoreOptions configStoreOptions = new ConfigStoreOptions()
-                .setType("file")
-                .setConfig(new JsonObject().put("path", value));
-        final ConfigRetrieverOptions configRetrieverOptions = new ConfigRetrieverOptions()
-                .addStore(configStoreOptions);
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(DbConfig.class).toInstance(DbConfig.from(
+            new JsonObject()
+                .put("jdbcUrl", "postgresql://levi-db/db_levi?search_path=unittest")
+                .put("dbUser", "levi")
+                .put("dbPassword", "moresecure")
+        ));
+        bind(Vertx.class).toInstance(vertx);
+      }
+    });
 
-        return ConfigRetriever.create(vertx, configRetrieverOptions);
+    try {
+      injector.getInstance(Db.class).getPgPool();
+
+      testContext.completeNow();
+    } catch (Throwable ex) {
+      testContext.failNow(ex);
     }
 
-    @BeforeEach
-    void initialize() {
-        final Injector injector = Guice.createInjector(new AbstractModule() {
+  }
 
-        });
+  @Test()
+  void Should_thrown_DbConfigException_When_wrongPasswordIsPassed(final Vertx vertx,
+      final VertxTestContext testContext) {
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(DbConfig.class).toInstance(DbConfig.from(
+            new JsonObject()
+                .put("jdbcUrl", "postgresql://levi-db/db_levi?search_path=unittest")
+                .put("dbUser", "levi")
+                .put("dbPassword", "---")
+        ));
+        bind(Vertx.class).toInstance(vertx);
+      }
+    });
 
-        injector.injectMembers(this);
-    }
+    Assertions.assertThatCode(() -> {
+      injector.getInstance(Db.class).getPgPool();
+    }).isExactlyInstanceOf(DbConfigException.class);
 
-    @Test
-    @Timeout(value = 60, timeUnit = TimeUnit.SECONDS)
-    void Should_return_an_active_connection_When_it_is_well_configure(final Vertx vertx,
-                                                                      final VertxTestContext testContext) {
+    testContext.completeNow();
+  }
 
-        final ConfigRetriever configRetriever = Test_DatabaseConnection.loadConfiguration(vertx, "./config.json");
+  @Test()
+  void Should_ReturnCorrectDbConfig__When_correctJsonObjectIsPassed() {
+    JsonObject vertxConfig = new JsonObject()
+        .put("jdbcUrl", "postgresql://localhost/db_test")
+        .put("dbUser", "postgres")
+        .put("dbPassword", "secure")
+        .put("poolMaxSize", 4)
+        .put("poolMaxWaitQueueSize", 2);
 
-        final Promise<JsonObject> promiseReadConfig = Promise.promise();
-        final Promise<Void> promiseDbConfiguration = Promise.promise();
+    DbConfig dbConfig = DbConfig.from(vertxConfig);
+    Assertions.assertThat(dbConfig)
+        .isNotNull();
 
-        configRetriever.getConfig(promiseReadConfig::handle);
+    Assertions.assertThat(dbConfig.getJdbcUrl())
+        .isEqualTo(vertxConfig.getString("jdbcUrl"));
+    Assertions.assertThat(dbConfig.getUser())
+        .isEqualTo(vertxConfig.getString("dbUser"));
+    Assertions.assertThat(dbConfig.getPassword())
+        .isEqualTo(vertxConfig.getString("dbPassword"));
+    Assertions.assertThat(dbConfig.getMaxSize())
+        .isEqualTo(vertxConfig.getInteger("poolMaxSize"));
+    Assertions.assertThat(dbConfig.getMaxWaitQueueSize())
+        .isEqualTo(vertxConfig.getInteger("poolMaxWaitQueueSize"));
+  }
 
-        promiseReadConfig.future()
-                .onComplete(r -> {
-                    r.result().stream().forEach(e -> vertx.getOrCreateContext().config().put(e.getKey(), e.getValue()));
-                    this.dbConfigurator.init(vertx,
-                            promiseDbConfiguration::handle);
+  @Test()
+  void Should_ReturnDefaultDbConfig__When_EmptyJsonIsPassed() {
+    JsonObject vertxConfig = new JsonObject();
 
-                });
+    DbConfig dbConfig = DbConfig.from(vertxConfig);
+    Assertions.assertThat(dbConfig)
+        .isNotNull();
 
-        promiseDbConfiguration.future()
-                .onComplete(r -> testContext.verify(() -> {
-                    Assertions.assertThat(this.db.getConnection())
-                            .isNotNull();
+    Assertions.assertThat(dbConfig.getJdbcUrl())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getUser())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getPassword())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getMaxSize())
+        .isEqualTo(4);
+    Assertions.assertThat(dbConfig.getMaxWaitQueueSize())
+        .isEqualTo(-1);
+  }
 
-                    testContext.completeNow();
-                }));
+  @Test()
+  void Should_ReturnDefaultDbConfig__When_NullJsonObjectIsPassed() {
+    JsonObject vertxConfig = null;
 
-    }
+    DbConfig dbConfig = DbConfig.from(vertxConfig);
+    Assertions.assertThat(dbConfig)
+        .isNotNull();
 
-    @Test()
-    void Should_thrown_exception_When_password_is_wrong(final Vertx vertx,
-                                                        final VertxTestContext testContext) {
-        final ConfigRetriever configRetriever = Test_DatabaseConnection.loadConfiguration(vertx, "./config.json");
-
-        final Promise<JsonObject> promiseReadConfig = Promise.promise();
-        Promise.promise();
-
-        configRetriever.getConfig(promiseReadConfig::handle);
-
-        promiseReadConfig.future()
-                .onComplete(r -> testContext.verify(() -> {
-
-                    r.result()
-                            .put("dbPassword", "")
-                            .stream()
-                            .forEach(e -> vertx.getOrCreateContext().config().put(e.getKey(), e.getValue()));
-
-                    this.dbConfigurator.init(vertx,
-                            ar -> testContext.verify(() -> {
-                                Assertions.assertThat(ar.cause().getClass()).isEqualTo(PgException.class);
-
-                                testContext.completeNow();
-                            }));
-
-                }));
-
-    }
+    Assertions.assertThat(dbConfig.getJdbcUrl())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getUser())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getPassword())
+        .isEqualTo("");
+    Assertions.assertThat(dbConfig.getMaxSize())
+        .isEqualTo(4);
+    Assertions.assertThat(dbConfig.getMaxWaitQueueSize())
+        .isEqualTo(-1);
+  }
 
 }

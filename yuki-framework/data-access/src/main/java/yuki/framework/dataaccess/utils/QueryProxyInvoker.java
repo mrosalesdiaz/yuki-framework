@@ -59,12 +59,12 @@ public class QueryProxyInvoker implements InvocationHandler {
                 .map(this.parameters::get)
                 .collect(Collectors.toList()));
 
-        if (this.db.getConnection() == null) {
+        if (this.db.getPgPool() == null) {
             promise.fail(new NullPointerException("Database connection is null"));
             return promise.future();
         }
 
-        this.db.getConnection()
+        this.db.getPgPool()
                 .preparedQuery(this.query)
                 .execute(parameters, ar -> {
                     if (ar.failed()) {
@@ -150,21 +150,21 @@ public class QueryProxyInvoker implements InvocationHandler {
         if (parameterValue == null) {
             return;
         }
-
+// TODO: Replace this by accessing ParameterType definition
         assert parameterAnnotation != null : "Parameter must have annotation to define database type";
 
         switch (parameterAnnotation.value()) {
             case BOOLEAN:
                 this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Boolean) parameterValue));
                 break;
-            case NUMERIC:
+            case DOUBLE:
                 this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Double) parameterValue));
                 break;
             case BYTEA:
                 this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (InputStream) parameterValue));
                 break;
+            case DATETIME:
             case DATE:
-            case TIMESTAMP_WITHOUT_TIME_ZONE:
             case TIME:
                 if (parameterValue instanceof Instant) {
                     this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Instant) parameterValue));
@@ -182,7 +182,7 @@ public class QueryProxyInvoker implements InvocationHandler {
             case INTEGER:
                 this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (Integer) parameterValue));
                 break;
-            case VARCHAR:
+            case STRING:
                 this.parameters.put(parameterName, ProcessDbParameter.parse(parameterAnnotation, (String) parameterValue));
                 break;
         }

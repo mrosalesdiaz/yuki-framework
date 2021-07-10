@@ -1,18 +1,20 @@
-plugins {
- 	id 'java-library'
-    id 'maven-publish'
-}
-
-repositories {
-    jcenter()
-}
-
 dependencies {
-	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
-	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
-	compile group: 'io.vertx', name:'vertx-pg-client', version:'3.9.4'
-	compile group: 'io.vertx', name: 'vertx-core', version: '3.9.4'
-	compile group: 'io.vertx', name: 'vertx-junit5', version: '3.9.4'
-    compile project(':data-schema')
-    compile group: 'io.vertx', name: 'vertx-config', version: '3.9.4'
+	implementation(deps.test_helper)
+	testImplementation(deps.common_test)
+
+	compile project(':data-schema')
+
+	testImplementation(platform(junit.bom))
+}
+
+publishing {
+	publications {
+		"test-helper"(MavenPublication) {
+			groupId = yuki.framework.groupId
+			artifactId = project.name
+			version = yuki.framework.version
+
+			from components.java
+		}
+	}
 }

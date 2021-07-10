@@ -1,0 +1,35 @@
+dependencies {
+	implementation(deps.data_function)
+	testImplementation(deps.common_test)
+
+	implementation project(':common')
+	implementation project(':verticle-helper')
+	implementation project(':data-access')
+
+	//testImplementation platform('org.junit.platform:junit-jupiter-params:5.7.1')
+	//testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
+	testImplementation(platform(junit.bom))
+
+
+
+	//testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+	//testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.0'
+	//testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.1'
+	//testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
+	//testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.7.1")
+//	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+//	testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.6.0'
+	//testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.18.1'
+}
+
+publishing {
+	publications {
+		"data-function"(MavenPublication) {
+			groupId = yuki.framework.groupId
+			artifactId = project.name
+			version = yuki.framework.version
+
+			from components.java
+		}
+	}
+}

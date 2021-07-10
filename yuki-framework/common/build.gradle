@@ -1,17 +1,18 @@
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-}
-
-repositories {
-    jcenter()
-}
-
 dependencies {
+    implementation(deps.common)
+    testImplementation(deps.common_test)
 
-    implementation (eclipse.vertx.core)
+    testImplementation(platform(junit.bom))
+}
 
-    testImplementation(deps.test)
-    testImplementation(platform(eclipse.test.junitbom))
-    testImplementation(eclipse.test.junitjupiter)
+publishing {
+    publications {
+        "common"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
 }

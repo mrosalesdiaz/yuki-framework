@@ -1,66 +1,125 @@
+def vertxLib(name) {
+    return "io.vertx:${name}:${ext.yuki.vertx.version}"
+}
 
 ext.google = [
-        guice : "com.google.inject:guice:4.2.3",
-        guava : "com.google.guava:guava:11.0.2"
+        guice: "com.google.inject:guice:4.2.3",
+        guava: "com.google.guava:guava:11.0.2"
 ]
 
-ext.postgresql = [
-        database : [
-                vertxclient:"io.vertx:vertx-pg-client:3.9.4",
-                hikaricp:"com.zaxxer:HikariCP:3.4.5"
-        ]
+ext.zaxxer = [
+        hikaricp: 'com.zaxxer:HikariCP:3.4.5'
 ]
 
-ext.commons = [
-        slf4j : "org.slf4j:slf4j-simple:1.7.30"
+ext.postgresql = 'org.postgresql:postgresql:42.1.4'
+
+ext.slf4j = [
+        simple: "org.slf4j:slf4j-simple:1.7.30"
 ]
 
-
-ext.commontest = [
-        junitjupiter: "org.junit.jupiter:junit-jupiter",
-        junitbom    : "org.junit:junit-bom:5.7.1",
-        assertj     : "org.assertj:assertj-core:3.18.1",
-        platform    : "org.junit.platform:junit-platform-commons:1.7.0"
-]
 
 ext.eclipse = [
-        vertx :[
-                core:"io.vertx:vertx-core:3.9.4",
-                web :"io.vertx:vertx-web:3.9.4",
-                webclient: "io.vertx:vertx-web-client:3.9.4"
-        ],
-        test : [
-                vertxclient:"org.assertj:assertj-core:3.11.1",
-                hikaricp:"io.vertx:vertx-junit5:3.9.4",
-                vertxconf:"io.vertx:vertx-config:3.9.4",
-                junitbom:"org.junit:junit-bom:5.7.1",
-                junitjupiter:"org.junit.jupiter:junit-jupiter"
+        vertx: [
+                core      : vertxLib('vertx-core'),
+                web       : vertxLib('vertx-web'),
+                config    : vertxLib('vertx-config'),
+                pg_client : vertxLib('vertx-pg-client'),
+                web_client: vertxLib('vertx-web-client'),
+
+
+                junit5    : vertxLib('vertx-junit5')
         ]
+]
+
+ext.javaparser = [
+        core: 'com.github.javaparser:javaparser-core:3.16.2'
+]
+
+ext.junit = [
+        bom   : 'org.junit:junit-bom:5.7.1',
+
+        api   : 'org.junit.jupiter:junit-jupiter-api:5.7.1',
+        engine: 'org.junit.jupiter:junit-jupiter-engine:5.7.1',
+        params: 'org.junit.jupiter:junit-jupiter-params:5.7.1'
+]
+
+ext.mockito = [
+        core         : 'org.mockito:mockito-core:3.6.0',
+        junit_jupiter: 'org.mockito:mockito-junit-jupiter:3.6.0'
+]
+
+ext.assertj = [
+        core: "org.assertj:assertj-core:3.11.1"
 ]
 
 ext.deps = [
-        di :[
+        data_access    : [
+                ext.google.guava,
                 ext.google.guice,
-                ext.google.guava
-        ],
-        web : [
-                ext.eclipse.vertx.web,
-                ext.eclipse.vertx.webclient
-        ],
-        db:[
-                ext.postgresql.database.vertxclient,
-                ext.postgresql.database.hikaricp
-        ],
-        vertxtest:[
-                ext.eclipse.test.vertxclient,
-                ext.eclipse.test.hikaricp,
-                ext.eclipse.test.vertxconf,
-                ext.commons.slf4j
-        ],
-        test:[
-                ext.commontest.assertj,
-                ext.google.guava
-        ]
 
+                ext.eclipse.vertx.core,
+                ext.eclipse.vertx.config,
+                ext.eclipse.vertx.pg_client,
+
+                ext.slf4j.simple,
+
+                ext.zaxxer.hikaricp
+        ],
+        data_function  : [
+                ext.google.guava,
+                ext.google.guice,
+
+                ext.postgresql,
+                ext.zaxxer.hikaricp,
+
+                ext.javaparser.core,
+
+                ext.eclipse.vertx.core,
+                ext.eclipse.vertx.config,
+                ext.eclipse.vertx.pg_client
+        ],
+        common         : [
+                ext.google.guava,
+                ext.google.guice,
+
+                ext.eclipse.vertx.core,
+
+                ext.zaxxer.hikaricp
+        ],
+        test_helper    : [
+                ext.google.guava,
+                ext.google.guice,
+
+                ext.eclipse.vertx.core,
+                ext.eclipse.vertx.junit5,
+                ext.eclipse.vertx.config,
+                ext.eclipse.vertx.pg_client
+        ],
+        verticle_helper: [
+                ext.google.guava,
+                ext.google.guice,
+
+                ext.eclipse.vertx.core,
+                ext.eclipse.vertx.web,
+                ext.eclipse.vertx.web_client,
+                ext.eclipse.vertx.config,
+                ext.eclipse.vertx.pg_client
+        ],
+        common_test    : [
+                ext.google.guava,
+                ext.google.guice,
+
+                ext.junit.api,
+                ext.junit.engine,
+                ext.junit.params,
+
+                ext.eclipse.vertx.junit5,
+
+                ext.eclipse.vertx.core,
+
+                ext.assertj.core,
+                ext.mockito.core,
+                ext.mockito.junit_jupiter
+        ]
 ]
 

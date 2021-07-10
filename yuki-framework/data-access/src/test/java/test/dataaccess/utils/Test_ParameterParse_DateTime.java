@@ -23,7 +23,7 @@ import static test.dataaccess.utils.Test_ParameterParse_String.createAnnotation;
 public class Test_ParameterParse_DateTime {
     @Test
     void Should_ReturnDateTimeDatabase__When_JavaInstantIsPassed() throws InstantiationException, IllegalAccessException {
-        Parameter parameter = createAnnotation(ParameterType.TIMESTAMP_WITHOUT_TIME_ZONE);
+        Parameter parameter = createAnnotation(ParameterType.DATETIME);
 
         Instant now = Instant.now();
         LocalDateTime today = LocalDateTime.from(now.atOffset(ZoneOffset.UTC));
@@ -48,7 +48,7 @@ public class Test_ParameterParse_DateTime {
 
     @Test
     void Should_ReturnDateTimeDatabase__When_JavaLocalDateTimeIsPassed() throws InstantiationException, IllegalAccessException {
-        Parameter parameter = createAnnotation(ParameterType.TIMESTAMP_WITHOUT_TIME_ZONE);
+        Parameter parameter = createAnnotation(ParameterType.DATETIME);
         LocalDateTime today = LocalDateTime.now();
 
         org.assertj.core.api.Assertions.assertThat(
@@ -60,7 +60,7 @@ public class Test_ParameterParse_DateTime {
 
     @Test
     void Should_ReturnDateTimeDatabase__When_JavaLocalDateTimeNullIsPassed() throws InstantiationException, IllegalAccessException {
-        Parameter parameter = createAnnotation(ParameterType.TIMESTAMP_WITHOUT_TIME_ZONE);
+        Parameter parameter = createAnnotation(ParameterType.DATETIME);
         LocalDateTime today = null;
 
         Assertions.assertThat(

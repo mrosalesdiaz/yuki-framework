@@ -1,0 +1,15 @@
+
+repositories {
+    //maven { url "https://jitpack.io" }
+    mavenCentral()
+}
+
+
+buildscript {
+    repositories {
+        //maven { url "https://jitpack.io" }
+
+        mavenCentral()
+    }
+}
+

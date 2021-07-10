@@ -3,33 +3,22 @@
 apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 
-ext.yuki = [
-        framework:[
-                version: "1.0",
-                groupId:"org.yuki"
-        ],
-        localrepo:'file://Volumes/sdcard/yuki/local_publish'
-]
-
-
 java {
     withJavadocJar()
     withSourcesJar()
 }
 
 publishing {
-    publications {
-        endpoints(MavenPublication) {
-            groupId = yuki.framework.groupId
-            artifactId = project.name
-            version = yuki.framework.version
-
-            from components.java
-        }
-    }
     repositories {
         maven {
             url = "${yuki.localrepo}"
+           /* url 'https://pkgs.dev.azure.com/Baiken9s/Levi%20App/_packaging/LeviFeed/maven/v1'
+            credentials {
+                username "LeviFeed"
+                //The Azure DevOps Services build system will use the "SYSTEM_ACCESSTOKEN" to authenticate to Azure DevOps Services feeds
+                password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
+            }
+            */
         }
     }
 }

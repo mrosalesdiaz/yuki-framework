@@ -10,9 +10,6 @@ plugins {
     id 'maven-publish'
 }
 
-repositories {
-    jcenter()
-}
 
 dependencies {
 	compile group: 'org.flywaydb', name:'flyway-core', version:'7.2.0'
@@ -27,4 +24,16 @@ flyway {
     user = 'hatunmayu'
     password = 'moresecure'
     schemas = ['lobby']
+}
+
+publishing {
+    publications {
+        "data-schema"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
 }

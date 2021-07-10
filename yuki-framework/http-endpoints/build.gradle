@@ -3,10 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-repositories {
-    jcenter()
-}
-
 dependencies {
 	compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
 	compile group: 'io.vertx', name: 'vertx-core', version: '3.9.4'
@@ -19,4 +15,16 @@ dependencies {
 vertx {
   mainVerticle = 'yuki.framework.rest.RestServerVerticle'
   debugSuspend = true
+}
+
+publishing {
+    publications {
+        "http-endpoints"(MavenPublication) {
+            groupId = yuki.framework.groupId
+            artifactId = project.name
+            version = yuki.framework.version
+
+            from components.java
+        }
+    }
 }

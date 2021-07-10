@@ -60,15 +60,10 @@ public class FlywayMain {
 
         final CommandLineParser commandLineParser = new DefaultParser();
         final CommandLine commandLine = commandLineParser.parse(options, args);
-        //System.out.println(commandLine.getOptionValue("server"));
         return commandLine;
     }
 
     public static void main(final String[] args) throws ParseException {
-       // System.out.println(args.length);
-        //System.out.println(args);
-        //System.out.println(":" + String.join(",", args) + ":");
-
         final CommandLine commandLine = FlywayMain.getCommanLine(args);
 
         final String action = commandLine.getOptionValue("a");
@@ -76,7 +71,6 @@ public class FlywayMain {
         final String user = commandLine.getOptionValue("u");
         final String password = commandLine.getOptionValue("p");
         final String schema = commandLine.getOptionValue("sch");
-        //System.out.println("action: " + action);
         FlywayMain.executeFlayway(action, url, user, password, schema);
     }
 }

@@ -20,7 +20,7 @@ public class Test_ParameterParse_Double {
 
     @Test
     void Should_ReturnNumericDatabase__When_JavaDoubleIsPassed() throws InstantiationException, IllegalAccessException {
-        Parameter parameter = createAnnotation(ParameterType.NUMERIC);
+        Parameter parameter = createAnnotation(ParameterType.DOUBLE);
         Assertions.assertThat(
                 ProcessDbParameter.parse(parameter, 12.12)
         ).isEqualTo(12.12);
@@ -28,7 +28,7 @@ public class Test_ParameterParse_Double {
 
     @Test
     void Should_ReturnNullNumericDatabase__When_JavaDoubleNullIsPassed() throws InstantiationException, IllegalAccessException {
-        Parameter parameter = createAnnotation(ParameterType.NUMERIC);
+        Parameter parameter = createAnnotation(ParameterType.DOUBLE);
         Assertions.assertThat(
                 ProcessDbParameter.parse(parameter, (Double) null)
         ).isNull();
