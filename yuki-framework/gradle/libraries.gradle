@@ -35,6 +35,10 @@ ext.javaparser = [
         core: 'com.github.javaparser:javaparser-core:3.16.2'
 ]
 
+ext.openfeign = [
+        core:"io.github.openfeign:feign-core:11.0"
+]
+
 ext.junit = [
         bom   : 'org.junit:junit-bom:5.7.1',
 
@@ -120,6 +124,14 @@ ext.deps = [
                 ext.assertj.core,
                 ext.mockito.core,
                 ext.mockito.junit_jupiter
+        ],
+
+        plugin :[
+                ext.google.guice,
+                ext.google.guava,
+                ext.javaparser.core,
+                ext.openfeign.core,
+                ext.eclipse.vertx.core
         ]
 ]
 

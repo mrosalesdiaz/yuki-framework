@@ -11,14 +11,13 @@ java {
 publishing {
     repositories {
         maven {
-            url = "${yuki.localrepo}"
-           /* url 'https://pkgs.dev.azure.com/Baiken9s/Levi%20App/_packaging/LeviFeed/maven/v1'
+            //url = "${yuki.localrepo}"
+           url 'https://pkgs.dev.azure.com/Baiken9s/Levi%20App/_packaging/LeviFeed/maven/v1'
             credentials {
                 username "LeviFeed"
                 //The Azure DevOps Services build system will use the "SYSTEM_ACCESSTOKEN" to authenticate to Azure DevOps Services feeds
                 password System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") != null ? System.getenv("AZURE_ARTIFACTS_ENV_ACCESS_TOKEN") : vstsMavenAccessToken
             }
-            */
         }
     }
 }

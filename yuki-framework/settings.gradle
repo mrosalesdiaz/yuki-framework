@@ -9,12 +9,6 @@
 
 rootProject.name = 'yuki-framework'
 
-//include ':development-api'
-//project(':development-api').projectDir = new File(settingsDir, './development-api')
-
-include ':http-endpoints'
-project(':http-endpoints').projectDir = new File(settingsDir, './http-endpoints')
-
 include ':data-access'
 project(':data-access').projectDir = new File(settingsDir, './data-access')
 
@@ -32,6 +26,12 @@ project(':verticle-helper').projectDir = new File(settingsDir, './verticle-helpe
 
 include ':data-function'
 project(':data-function').projectDir = new File(settingsDir, './data-function')
+
+include ':gradle-plugin'
+project(':gradle-plugin').projectDir = new File(settingsDir, './gradle-plugin')
+
+include ':development-service'
+project(':development-service').projectDir = new File(settingsDir, './development-service')
 
 //include ':gradle-plugin'
 //project(':gradle-plugin').projectDir = new File(settingsDir, './gradle-plugin')

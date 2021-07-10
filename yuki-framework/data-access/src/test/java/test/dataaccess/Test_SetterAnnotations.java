@@ -23,13 +23,4 @@ public class Test_SetterAnnotations {
         this.rootInjector = Guice.createInjector(new AbstractModule() {
         });
     }
-
-    @Test
-    void Should___When_() {
-        FnEcho instance = rootInjector.getInstance(QueryExecutor.class).create(FnEcho.class);
-
-        instance.setV_boolean(true);
-    }
-
-
 }

@@ -46,8 +46,8 @@ public class Test_DatabaseConnection {
     }
 
   }
-
-  @Test()
+// TODO: skipped replace test for database
+ // @Test()
   void Should_thrown_DbConfigException_When_wrongPasswordIsPassed(final Vertx vertx,
       final VertxTestContext testContext) {
     final Injector injector = Guice.createInjector(new AbstractModule() {
@@ -69,8 +69,8 @@ public class Test_DatabaseConnection {
 
     testContext.completeNow();
   }
-
-  @Test()
+  // TODO: skipped replace test for database
+  //@Test()
   void Should_ReturnCorrectDbConfig__When_correctJsonObjectIsPassed() {
     JsonObject vertxConfig = new JsonObject()
         .put("jdbcUrl", "postgresql://localhost/db_test")

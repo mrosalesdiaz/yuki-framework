@@ -4,10 +4,10 @@ plugins {
 }
 
 dependencies {
-    compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
-    compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
-    compile project(':data-function')
-    compile project(':data-schema')
+    implementation (deps.plugin)
+
+    testCompile(deps.common_test)
+
 
     //implementation "com.github.javaparser:javaparser-core:3.16.2"
 	//implementation "io.github.openfeign:feign-core:11.0"
@@ -21,15 +21,16 @@ gradlePlugin {
     plugins {
         simplePlugin {
             id = 'yuki-plugin'
-            version ='1.0'
-            implementationClass = 'yuki.gradleplugin.YukiGenPlugin'
+            version =yuki.framework.version
+            implementationClass = 'yuki.plugin.YukiGenPlugin'
         }
     }
 }
-print yuki.framework.groupId+":"+project.name+":"+yuki.framework.version
+/*
+
 publishing {
     publications {
-        "gradle-plugin"(MavenPublication) {
+        "yuki-plugin"(MavenPublication) {
             groupId = yuki.framework.groupId
             artifactId = project.name
             version = yuki.framework.version
@@ -38,8 +39,6 @@ publishing {
         }
     }
 }
-/*
-
 java {
     withJavadocJar()
     withSourcesJar()

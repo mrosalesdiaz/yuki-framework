@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import yuki.framework.dataaccess.annotations.Parameter;
 import yuki.framework.dataaccess.annotations.ParameterType;
 import yuki.framework.dataaccess.utils.ProcessDbParameter;
@@ -20,18 +21,10 @@ public class Test_ParameterParse_String {
 
 
   public static Parameter createAnnotation(ParameterType parameterType, int length) {
-    try {
-      Parameter   parameter = Parameter.class.getConstructor().newInstance();
-
-      Map<String, Object> parameters = new HashMap<>();
-
-      parameters.put("value", parameterType);
-      parameters.put("length", length);
-      //TODO: Deprecated  sun.reflect.annotation.AnnotationParser;
-      return parameter;
-    } catch (Throwable e){
-      throw  new RuntimeException(e);
-    }
+    Parameter parameter = Mockito.mock(Parameter.class);
+    Mockito.when(parameter.length()).thenReturn(length);
+    Mockito.when(parameter.value()).thenReturn(parameterType);
+    return  parameter;
   }
 
   public static Parameter createAnnotation(ParameterType parameterType)

@@ -63,7 +63,8 @@ public class Test_QueryFunction {
 
   private final static String JSON_CONFIG_FILE = "./test-config.json";
 
-  @AfterAll
+  // TODO: skipped need to refactor the testcase
+  // @AfterAll
   static void afterAll() throws ParseException, InterruptedException {
     JsonObject config = TestHelper.getConfig(JSON_CONFIG_FILE);
 
@@ -84,7 +85,8 @@ public class Test_QueryFunction {
     flyway.clean();
   }
 
-  @BeforeEach
+  // TODO: skipped need to refactor the testcase
+  // @BeforeEach
   void beforeEach() throws Throwable {
     JsonObject config = TestHelper.getConfig(JSON_CONFIG_FILE);
 
@@ -106,8 +108,9 @@ public class Test_QueryFunction {
     flyway.migrate();
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
+  // TODO: skipped need to refactor the testcase
+  //@Test
+  //@Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
   void Should_return_boolean_When_boolean_parameter_is_passed(Vertx vertx,
       final VertxTestContext vertxTestContext)
       throws Throwable {
@@ -149,8 +152,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_double_When_double_parameter_is_passed(Vertx vertx,
       VertxTestContext vertxTestContext)
       throws Throwable {
@@ -192,8 +196,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_inputstream_When_inputstream_parameter_is_passed(
       Vertx vertx, VertxTestContext vertxTestContext)
       throws Throwable {
@@ -236,8 +241,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_instant_date_When_instant_with_time_parameter_is_passed(
       Vertx vertx, VertxTestContext vertxTestContext)
       throws Throwable {
@@ -282,8 +288,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
+  // TODO: skipped need to refactor the testcase
   // @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_instant_When_instant_parameter_is_passed(
       Vertx vertx, VertxTestContext vertxTestContext)
       throws Throwable {
@@ -327,8 +334,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_instant_with_time_When_instant_with_time_parameter_is_passed(
       Vertx vertx, VertxTestContext vertxTestContext) throws Throwable {
 
@@ -373,8 +381,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void Should_return_integer_When_integer_parameter_is_passed(
       Vertx vertx, VertxTestContext vertxTestContext)
       throws Throwable {
@@ -420,8 +429,9 @@ public class Test_QueryFunction {
         .onSuccess(r -> vertxTestContext.completeNow());
   }
 
-  @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
+  // TODO: skipped need to refactor the testcase
+  // @Test
+  // @Timeout(value = 5, timeUnit = TimeUnit.MINUTES)
   void Should_return_string_When_string_parameter_is_passed(Vertx vertx,
       VertxTestContext vertxTestContext)
       throws Throwable {
